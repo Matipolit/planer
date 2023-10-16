@@ -24,7 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-_sh4gb9fjl&)__j)l_8qi953mayo28umz4y6)wbmaq60x&0@nj"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('PLANER_DEBUG', '')
+env_debug = os.environ.get('PLANER_DEBUG')
+if env_debug is None:
+    DEBUG = False
+elif env_debug == "True":
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = ["0.0.0.0", "192.168.0.32", "sienkiewiczapi.duckdns.org"]
 
