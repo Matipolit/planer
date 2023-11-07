@@ -25,13 +25,13 @@ class Purchase(models.Model):
     locator_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Debt(models.Model):
-    purchase_id = models.ForeignKey(Purchase, on_delete=models.CASCADE, null=False, blank=False)
+    purchase_id = models.OneToOneField(Purchase, on_delete=models.CASCADE, null=False, blank=False)
     # basic user for now
-    locator_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    locator_id = models.OneToOneField(User, on_delete=models.CASCADE, null=False, blank=False)
     is_paid = models.BooleanField(default=False, null=False, blank=False)
 
 class TasksInWeek(models.Model):
-    task_id = models.ForeignKey(Task, on_delete=models.CASCADE, unique=True, null=False, blank=False)
+    task_id = models.OneToOneField(Task, on_delete=models.CASCADE, unique=True, null=False, blank=False)
     week_id = models.ForeignKey(Week, on_delete=models.CASCADE, null=False, blank=False)
-    locator_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    locator_id = models.OneToOneField(User, on_delete=models.CASCADE, null=False, blank=False)
     is_done = models.BooleanField(default=False, null=False, blank=False)
