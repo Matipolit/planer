@@ -32,7 +32,7 @@ elif env_debug == "True":
 else:
     DEBUG = False
 
-ALLOWED_HOSTS = ["0.0.0.0", "192.168.0.32", "sienkiewiczapi.duckdns.org"]
+ALLOWED_HOSTS = ["0.0.0.0", "192.168.0.32", "sienkiewiczapi.duckdns.org", "sienkiewicza114.wroclaw.pl"]
 
 
 # Application definition
