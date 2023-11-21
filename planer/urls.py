@@ -14,10 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, reverse_lazy
 from planer_app import views
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+
+
 
 urlpatterns = [
     path("planer/admin/", admin.site.urls),
-    path("planer/", include("planer_app.urls"))
+    #path("planer/", include("planer_app.urls")),
+    path('planer/login/', LoginView.as_view(template_name='login.html', next_page=reverse_lazy('/')), name='login'),
+
 ]
