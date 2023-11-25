@@ -2,11 +2,20 @@
 
 {% block content %}
 <h1>Login</h1>
- <form>
-  <label for="email">Email</label><br>
-  <input type="email" id="email" name="email"><br>
-  <label for="password">Hasło</label><br>
-  <input type="password" id="password" name="password">
+ <form method="post">
+  {% csrf_token %}
+   <table>
+      <tr>
+        <td>{{ form.username.label_tag }}</td>
+        <td>{{ form.username }}</td>
+      </tr>
+      <tr>
+        <td>{{ form.password.label_tag }}</td>
+        <td>{{ form.password }}</td>
+      </tr>
+    </table>
+  <input type="submit" value="login">
+  <input type="hidden" name="next" value="{{ next }}">
 </form> 
 {% endblock content %}
 

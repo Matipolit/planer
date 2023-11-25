@@ -3,12 +3,24 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="style.css">
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'style.css' %}">
         <title>Planer</title>
     </head>
-
     <body>
-    {% block content %}{% endblock content %}
+        {% if user.is_authenticated %}
+        {% with request.resolver_match.view_name as view_name %}
+        <div class="navbar">
+                <a href="/planer/logout" >Log out</a>
+                <h1>Welcome {{user_name}}</h1>
+                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">Tasks</a>
+                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">Expenses</a>
+        </div>
+        {% endwith %}
+        {% endif %}
+        <div class="content">
+            {% block content %}{% endblock content %}
+        </div>
     </body>
 </html>
 

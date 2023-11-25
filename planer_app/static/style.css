@@ -1,0 +1,60 @@
+html {
+	font-family: system-ui, sans-serif;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  display: flex;
+}
+
+.navbar {
+  display: flex;
+  flex-direction: column;
+  max-width: 200px;
+  background-color: #eeeeee;
+  padding: 4px;
+  height: inherit;
+  z-index: 1;
+  gap: 4px;
+}
+
+.nav {
+  font-size: x-large;
+  width: auto;
+  background-color: #414559;
+}
+
+.selected {
+  color: #81c8be;
+  font-weight: bold;
+  background-color: #626880;
+}
+
+
+.content {
+  padding: 8px;
+}
+
+a {
+  padding: 4px;
+  width: fit-content; 
+}
+  
+@media (prefers-color-scheme: dark){
+	html {
+		background-color: #232634;
+		color: white;
+	}
+
+  .navbar {
+    background-color: #303446;
+  }
+
+  a {
+    color: #85c1dc;
+    background-color: #51576d;
+
+  }
+}
