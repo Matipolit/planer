@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+  window.onload = (event) => {
+    const slider = document.getElementById("frequency");
+    const label = document.getElementById("for_frequency");
+    slider.addEventListener("input", (event) => {
+      label.textContent = "Every " + event.target.value + " weeks";
+    })  
+  };
+
+</script>
+
+<style>
+  .taskList, .addTask {
+    background-color: #303446;
+  }
+
+  .taskList {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .manage {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  .addTask {
+    padding: 6px;
+  }
+
+  .task {
+    padding: 2px;
+  }
+
+  .task, .addTask {
+    border: solid;
+    background-color: #414559;
+    border-color: #626880;
+    border-radius: 2px;
+  }
+</style>
+
+<h1>Manage tasks</h1>
+
+<div class="manage">
+  <div class="taskList">
+    <h2>List of tasks</h2>
+    {% for task in tasks %}
+      <div class="task">
+        <p>Name: <b>{{ task.name }}</b></p>
+        <p>Every <b>{{ task.frequency }}</b> weeks</p>
+      </div>
+    {% endfor %}
+  </div>
+  <form class="addTask" method="post">
+
+    {% csrf_token %}
+    <h2>Add task</h2>
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name"><br>
+    <label id="for_frequency" for="frequency">Every 1 week</label><br>
+    <input type="range" id="frequency" name="frequency" min="1" max="51" value="1"><br>
+    <input type="submit" value="submit">
+  </form>
+</div>
+
+{% endblock content %}
+

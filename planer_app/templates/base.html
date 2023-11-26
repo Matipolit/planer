@@ -15,6 +15,9 @@
                 <h1>Welcome {{user_name}}</h1>
                 <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">Tasks</a>
                 <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">Expenses</a>
+                {% if user.is_superuser %}
+                <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/planer/tasks_manage/">Manage tasks</a>
+                {% endif %}
         </div>
         {% endwith %}
         {% endif %}
