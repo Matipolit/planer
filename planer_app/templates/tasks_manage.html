@@ -3,6 +3,24 @@
 {% block content %}
 
 <script>
+
+  async function deleteTask(id) {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    console.log("deleting task " + id);
+    const response = await fetch("", {
+      method: "DELETE",
+        headers: {
+        "X-CSRFToken": csrftoken,
+        "Content-Type": "application/json",
+        //"Content-Type": "multipart/form-data",
+      },
+      body: JSON.stringify(
+        {id: id}
+      )
+    })
+    console.log("response: " + response);
+    location.reload();
+  }
   window.onload = (event) => {
     const slider = document.getElementById("frequency");
     const label = document.getElementById("for_frequency");
@@ -56,6 +74,7 @@
       <div class="task">
         <p>Name: <b>{{ task.name }}</b></p>
         <p>Every <b>{{ task.frequency }}</b> weeks</p>
+        <button onClick="deleteTask({{ task.id }})">Delete</a>
       </div>
     {% endfor %}
   </div>

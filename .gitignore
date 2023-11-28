@@ -1,2 +1,4 @@
 planer/__pycache__/
+planer_app/__pycache__/
+users_app/__pycache__/
 .env
