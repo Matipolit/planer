@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <style>
+
+  #manage {
+    display: flex;
+    gap: 8px;
+    align-content: start;
+    align-items: start;
+  }
+
+  </style>
+
+  <h1>Manage users</h1>
+  <div id="manage">
+    <div class="card verticalList">
+      <h2>List of users</h2>
+      {% for user in users %}
+        <div class="item">
+          {% if user.is_staff %}
+            <p class="info">admin</p>
+          {% endif %}
+          <p>Email: <b>{{ user.email}}</b></p>
+          <p>First name: <b>{{ user.first_name}}</b></p>
+          <p>Last name: <b>{{ user.last_name}}</b></p>
+          <p>Username: <b>{{ user.username }}</b></p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <form class="card" method="post">
+      {% csrf_token %}
+      <h2>Add user</h2>
+      <input type="checkbox" id="admin" name="admin" value="admin">
+      <label for="admin">Admin</label><br>
+      <label for="email">E-mail:</label><br>
+      <input type="email" id="email" name="email"><br>
+      <label for="username">Username:</label><br>
+      <input type="text" id="username" name="username"><br>
+      <label for="first_name">First name:</label><br>
+      <input type="text" id="first_name" name="first_name"><br>
+      <label for="last_name">Last name:</label><br>
+      <input type="text" id="last_name" name="last_name"><br>
+      <label for="password">Password:</label><br>
+      <input type="text" id="password" name="password"><br>
+      <input type="submit" value="Add user">
+    </form>
+  </div>
+{% endblock content %}

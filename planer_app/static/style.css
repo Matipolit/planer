@@ -41,6 +41,25 @@ a {
   padding: 4px;
   width: fit-content; 
 }
+
+.card {
+  background-color: #dddddd;
+  padding: 4px;
+}
+
+.item {
+  border: solid;
+  background-color: #414559;
+  border-color: #626880;
+  border-radius: 2px;
+  padding: 2px;
+}
+
+.verticalList {
+  display: flex;
+  gap: 3px;
+  flex-direction: column;
+}
   
 @media (prefers-color-scheme: dark){
 	html {
@@ -55,7 +74,9 @@ a {
   a {
     color: #85c1dc;
     background-color: #51576d;
-
+  }
+  .card {
+    background-color: #303446;
   }
 }
   .tasksWrapper {

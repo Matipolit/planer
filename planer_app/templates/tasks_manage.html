@@ -32,53 +32,30 @@
 </script>
 
 <style>
-  .taskList, .addTask {
-    background-color: #303446;
-    padding: 4px;
-  }
 
-  .taskList {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .manage {
+  #manage {
     display: flex;
     gap: 8px;
-    flex-direction: column;
+    align-content: start;
+    align-items: start;
   }
 
-  .addTask {
-    padding: 6px;
-  }
-
-  .task {
-    padding: 2px;
-  }
-
-  .task {
-    border: solid;
-    background-color: #414559;
-    border-color: #626880;
-    border-radius: 2px;
-  }
 </style>
 
 <h1>Manage tasks</h1>
 
-<div class="manage">
-  <div class="taskList">
+<div id="manage">
+  <div class="card verticalList">
     <h2>List of tasks</h2>
     {% for task in tasks %}
-      <div class="task">
+      <div class="task item">
         <p>Name: <b>{{ task.name }}</b></p>
         <p>Every <b>{{ task.frequency }}</b> weeks</p>
         <button onClick="deleteTask({{ task.id }})">Delete</a>
       </div>
     {% endfor %}
   </div>
-  <form class="addTask" method="post">
+  <form id="addTask" class="card" method="post">
 
     {% csrf_token %}
     <h2>Add task</h2>
