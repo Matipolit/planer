@@ -2,6 +2,27 @@
 
 {% block content %}
 
+
+  <script>
+
+    async function deleteUser(id) {
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      console.log("deleting user" + id);
+      const response = await fetch("", {
+        method: "DELETE",
+          headers: {
+          "X-CSRFToken": csrftoken,
+          "Content-Type": "application/json",
+          //"Content-Type": "multipart/form-data",
+        },
+        body: JSON.stringify(
+          {id: id}
+        )
+      })
+      console.log("response: " + response);
+      location.reload();
+    }
+  </script>
   <style>
 
   #manage {
@@ -26,6 +47,7 @@
           <p>First name: <b>{{ user.first_name}}</b></p>
           <p>Last name: <b>{{ user.last_name}}</b></p>
           <p>Username: <b>{{ user.username }}</b></p>
+        <button onClick="deleteUser({{ user.id }})">Delete</a>
         </div>
       {% endfor %}
     </div>

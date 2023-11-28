@@ -44,7 +44,7 @@ a {
 
 .card {
   background-color: #dddddd;
-  padding: 4px;
+  padding: 8px;
 }
 
 .item {
@@ -52,12 +52,12 @@ a {
   background-color: #414559;
   border-color: #626880;
   border-radius: 2px;
-  padding: 2px;
+  padding: 4px;
 }
 
 .verticalList {
   display: flex;
-  gap: 3px;
+  gap: 4px;
   flex-direction: column;
 }
   
