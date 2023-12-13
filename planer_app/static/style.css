@@ -1,6 +1,15 @@
 html {
+  --rich-black: #010D14;
+  --surface: #CED6DF;
+  --surface-2: #E6EAEF;
+  --surface-deep: #A8B6C7;
+  --accent-dark: #28666E;
+  --border: rgba(2, 25, 39, 0.4);
+
 	font-family: system-ui, sans-serif;
   height: 100%;
+  color: var(--rich-black);
+
 }
 
 body {
@@ -10,10 +19,8 @@ body {
 }
 
 .navbar {
-  display: flex;
-  flex-direction: column;
   max-width: 200px;
-  background-color: #eeeeee;
+  background-color: var(--surface-2);
   padding: 4px;
   height: inherit;
   z-index: 1;
@@ -23,13 +30,12 @@ body {
 .nav {
   font-size: x-large;
   width: auto;
-  background-color: #414559;
 }
 
 .selected {
-  color: #81c8be;
+  color: var(--accent-dark);
   font-weight: bold;
-  background-color: #626880;
+  background-color: var(--surface-deep);
 }
 
 
@@ -40,25 +46,44 @@ body {
 a {
   padding: 4px;
   width: fit-content; 
+  color: #04314E;
 }
 
 .card {
-  background-color: #dddddd;
+  background-color: var(--surface-2);
   padding: 8px;
+  border: solid;
+  border-width: 2px;
+  border-color: var(--border);
+  border-radius: 4px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25)
 }
 
 .item {
   border: solid;
-  background-color: #414559;
-  border-color: #626880;
-  border-radius: 2px;
+  border-radius: 4px;
+  background-color: var(--surface);
+  border-color: var(--border);
   padding: 4px;
+  border-width: 2px;
 }
 
 .verticalList {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   flex-direction: column;
+}
+
+button, .button {
+  background-color: var(--surface-2);
+  border: solid;
+  border-color: var(--border);
+  border-radius: 2px;
+  border-width: 2px;
+}
+
+button:hover, .button:hover {
+  background-color: var(--surface-deep);
 }
   
 @media (prefers-color-scheme: dark){
@@ -68,15 +93,21 @@ a {
 	}
 
   .navbar {
-    background-color: #303446;
+    background-color: var(--surface-2);
   }
 
   a {
     color: #85c1dc;
     background-color: #51576d;
   }
+
   .card {
     background-color: #303446;
+  }
+  .item {
+    
+    background-color: #414559;
+    border-color: #626880;
   }
 }
   .tasksWrapper {

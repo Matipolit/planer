@@ -28,6 +28,7 @@ env_debug = os.environ.get('PLANER_DEBUG')
 if env_debug is None:
     DEBUG = False
 elif env_debug == "True":
+    print("Running in debug mode")
     DEBUG = True
 else:
     DEBUG = False

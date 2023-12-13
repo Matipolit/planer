@@ -41,7 +41,7 @@
       {% for user in users %}
         <div class="item">
           {% if user.is_staff %}
-            <p class="info">admin</p>
+            <p class="info"><b>Admin</b></p>
           {% endif %}
           <p>Email: <b>{{ user.email}}</b></p>
           <p>First name: <b>{{ user.first_name}}</b></p>
@@ -66,8 +66,8 @@
       <label for="last_name">Last name:</label><br>
       <input type="text" id="last_name" name="last_name"><br>
       <label for="password">Password:</label><br>
-      <input type="text" id="password" name="password"><br>
-      <input type="submit" value="Add user">
+      <input type="text" id="password" name="password"><br><br>
+      <input class="button" type="submit" value="Add user">
     </form>
   </div>
 {% endblock content %}

@@ -1,13 +1,24 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpRequest, JsonResponse
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from .models import Task, User
+from .models import Task, User, TasksInWeek, Week
 import json 
 from datetime import date, timedelta, datetime
 
+# for iterating over time by week
+def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
+    currentDate = startDate
+    idx = 1
+    while currentDate <= endDate:
+        yield (currentDate, idx)
+        idx += 1
+        currentDate += delta
+
+
+
+# views
 @login_required(login_url='login')
 def index(request: HttpRequest):
     return render(request, "index.html")
@@ -16,7 +27,6 @@ def index(request: HttpRequest):
 @login_required(login_url='login')
 def expenses(request: HttpRequest):
     return render(request, "expenses.html")
-
 
 @staff_member_required(login_url="login")
 def tasks_manage(request):
@@ -27,8 +37,23 @@ def tasks_manage(request):
         if(type=="task"):
             Task.objects.create(name = vars["name"], frequency = vars["frequency"])
         elif(type=="generate"):
+            tasks = Task.objects.all()
+            begDate = datetime.strptime(vars["beg_date"], "%Y-%m-%d")
             endDate = datetime.strptime(vars["end_date"], "%Y-%m-%d")
-            print(endDate)
+
+            locators = User.objects.all()
+            locatorsNum = len(locators)
+            for (weekBegDate, idx) in dateSpan(begDate, endDate):
+                weekEndDate: datetime.date = weekBegDate + timedelta(days=6)
+                print(f"Generating week {weekBegDate} - {weekEndDate}")
+                week = Week.objects.create(start_date = weekBegDate, end_date = weekEndDate)
+                print("week generated")
+                for task in tasks:
+                    print(f"Checking to add task {task}")
+                    if(task.frequency % idx == 0):
+                        print(f"Task elegible to add")
+                        taskInWeek = TasksInWeek.objects.create(locator_id = locators[idx % locatorsNum], task_id=task, week_id= week, is_done = False)
+                        print(taskInWeek)
 
     elif(request.method == "DELETE"):
         vars = json.loads(request.DELETE)

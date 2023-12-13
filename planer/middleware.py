@@ -9,6 +9,3 @@ class HttpPostTunnelingMiddleware(object):
             request.DELETE = request.body
         return self.get_response(request)
 
-    def process_exception(self, request, exception): 
-        return HttpResponse("in exception")
-

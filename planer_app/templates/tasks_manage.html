@@ -62,16 +62,18 @@
     <label for="name">Name:</label><br>
     <input type="text" id="name" name="name"><br>
     <label id="for_frequency" for="frequency">Every 1 week</label><br>
-    <input type="range" id="frequency" name="frequency" min="1" max="51" value="1"><br>
-    <input type="submit" value="submit">
+    <input type="range" id="frequency" name="frequency" min="1" max="51" value="1"><br><br>
+    <input class="button" type="submit" value="submit">
   </form>
   <form class="card" method="post">
     {% csrf_token %}
     <h2>Generate tasks</h2>
     <input type="hidden" id="formtype" name="formtype" value="generate"> 
+    <label for="beg_date">From date:</label><br>
+    <input type="date" name="beg_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br>
     <label for="beg_date">To date:</label><br>
-    <input type="date" name="end_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br>
-    <input type="submit" value="submit">
+    <input type="date" name="end_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br><br>
+    <input class="button" type="submit" value="submit">
   </form>
 </div>
 
