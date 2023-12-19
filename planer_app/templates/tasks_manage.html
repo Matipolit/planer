@@ -4,9 +4,9 @@
 
 <script>
 
-  async function deleteTask(id) {
+  async function deleteItem(id, table) {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    console.log("deleting task " + id);
+    console.log("deleting " + table +" with id: " + id);
     const response = await fetch("", {
       method: "DELETE",
         headers: {
@@ -15,7 +15,10 @@
         //"Content-Type": "multipart/form-data",
       },
       body: JSON.stringify(
-        {id: id}
+        {
+          id: id,
+          type: table,
+        }
       )
     })
     console.log("response: " + response);
@@ -51,7 +54,18 @@
       <div class="task item">
         <p>Name: <b>{{ task.name }}</b></p>
         <p>Every <b>{{ task.frequency }}</b> weeks</p>
-        <button onClick="deleteTask({{ task.id }})">Delete</a>
+        <button onClick="deleteItem({{ task.id }}, 'task')">Delete</a>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="card verticalList">
+    <h2>List of weeks</h2>
+    {% for week in weeks%}
+      <div class="item">
+        <p>Start: <b>{{ week.start_date }}</b></p>
+        <p>End: <b>{{ week.end_date}}</b></p>
+        <p>Tasks: <b>{{ week.count}}</b></p>
+        <button onClick="deleteItem({{ week.id }}, 'week')">Delete</a>
       </div>
     {% endfor %}
   </div>

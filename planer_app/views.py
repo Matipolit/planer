@@ -10,7 +10,7 @@ from datetime import date, timedelta, datetime
 # for iterating over time by week
 def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
     currentDate = startDate
-    idx = 1
+    idx = 0
     while currentDate <= endDate:
         yield (currentDate, idx)
         idx += 1
@@ -49,8 +49,8 @@ def tasks_manage(request):
                 week = Week.objects.create(start_date = weekBegDate, end_date = weekEndDate)
                 print("week generated")
                 for task in tasks:
-                    print(f"Checking to add task {task}")
-                    if(task.frequency % idx == 0):
+                    print(f"Checking to add task {task} with freq {task.frequency} and idx of week {idx}")
+                    if(idx % task.frequency== 0):
                         print(f"Task elegible to add")
                         taskInWeek = TasksInWeek.objects.create(locator_id = locators[idx % locatorsNum], task_id=task, week_id= week, is_done = False)
                         print(taskInWeek)
@@ -58,7 +58,13 @@ def tasks_manage(request):
     elif(request.method == "DELETE"):
         vars = json.loads(request.DELETE)
         id = vars["id"]
-        instance = Task.objects.get(id=id)
+        type = vars["type"]
+        if(type == "task"):
+            instance = Task.objects.get(id = id)
+        elif(type == "week"):
+            instance = Week.objects.get(id = id)
+            TasksInWeek.objects.all().filter(week_id = instance.id).delete()
+            
         print(f"Deleting instance {instance}")
         instance.delete()
         return JsonResponse({"deleted": "true"})
@@ -66,7 +72,11 @@ def tasks_manage(request):
     today_date = date.today()
     monday_date = today_date - timedelta(days = today_date.weekday())
     tasks = Task.objects.all()
-    context = {"tasks": tasks, "today": monday_date.strftime("%Y-%m-%d")}
+    weeks = Week.objects.all()
+    for week in weeks:
+        tasksInWeek = TasksInWeek.objects.all().filter(week_id = week.id)
+        week.count = len(tasksInWeek)
+    context = {"tasks": tasks, "today": monday_date.strftime("%Y-%m-%d"), "weeks": weeks}
     return render(request, "tasks_manage.html", context)
 
 @staff_member_required(login_url="login")
