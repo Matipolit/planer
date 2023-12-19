@@ -5,7 +5,7 @@
 
 
   // params - name, tasks
-  function addNewPerson() {
+  function addNewPerson(name, tasks) {
     var contentWrapper = document.createElement('div');
     contentWrapper.setAttribute('class', 'tasksContentWrapper');
 
@@ -16,9 +16,7 @@
     checkbox.setAttribute('type', 'checkbox');
 
     var name = document.createElement('h3');
-    name.textContent = 'IMIE NAZWISKO';
-
-    var tasks = ["XD", "XD"];
+    name.textContent = name;
 
     var taskList = document.createElement('ul');
 
@@ -36,6 +34,31 @@
 
     document.getElementById('tasks').appendChild(contentWrapper);
   }
+
+  var users = [];
+  
+  {% for task in tasks %}
+
+  var locator = {{ task.locator_id.name }};
+  users.push(locator);
+
+  {% endfor %}
+
+  for (locator of users) {
+    var tasksJS = [];
+
+    {% for task in tasks %}
+
+      {% if task.locator_id.username == locator %}
+      tasksJS.push(task.task_id.name);
+      {% endif %}  
+
+    {% endfor %}
+
+    addNewPerson(locator, tasksJS);
+
+  }
+
 </script>
 
 <h1>Your tasks</h1>

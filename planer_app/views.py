@@ -21,7 +21,14 @@ def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
 # views
 @login_required(login_url='login')
 def index(request: HttpRequest):
-    return render(request, "index.html")
+    today_date = date.today()
+    monday_date = today_date - timedelta(days = today_date.weekday())
+    
+    week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
+    tasks = TasksInWeek.objects.get(week_id = week)
+    context = {"tasks": tasks}
+
+    return render(request, "index.html", context)
 
 
 @login_required(login_url='login')
