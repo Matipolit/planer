@@ -1,76 +1,85 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script>
 
+<body>
 
-  // params - name, tasks
-  function addNewPerson(name, tasks) {
-    var contentWrapper = document.createElement('div');
-    contentWrapper.setAttribute('class', 'tasksContentWrapper');
-
-    var content = document.createElement('div');
-    content.setAttribute('class', 'tasksContent');
-
-    var checkbox = document.createElement('input');
-    checkbox.setAttribute('type', 'checkbox');
-
-    var name = document.createElement('h3');
-    name.textContent = name;
-
-    var taskList = document.createElement('ul');
-
-    for (let task of tasks) {
-      var item = document.createElement('li');
-      item.innerText = task;
-      taskList.appendChild(item);
-    }
-
-    content.appendChild(checkbox);
-    content.appendChild(name);
-    content.appendChild(taskList);
-
-    contentWrapper.appendChild(content);
-
-    document.getElementById('tasks').appendChild(contentWrapper);
-  }
-
-  var users = [];
-  
-  {% for task in tasks %}
-
-  var locator = {{ task.locator_id.name }};
-  users.push(locator);
-
-  {% endfor %}
-
-  for (locator of users) {
-    var tasksJS = [];
-
-    {% for task in tasks %}
-
-      {% if task.locator_id.username == locator %}
-      tasksJS.push(task.task_id.name);
-      {% endif %}  
-
-    {% endfor %}
-
-    addNewPerson(locator, tasksJS);
-
-  }
-
-</script>
-
-<h1>Your tasks</h1>
+  <h1>Your tasks</h1>
   <div class="tasksWrapper">
     <div id="tasks" class="tasks">
-      <div class="tasksContentWrapper">
-          <div class="tasksContent">XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br></div>
-      </div>
-      <div class="tasksContentWrapper">
-          <div class="tasksContent">XDXDDDDDDDDDDDDDDDDDDDDD</div>
-      </div>
     </div>
   </div>
+
+  <script>
+
+
+    // params - name, tasks
+    function addNewPerson(loc_name, tasks) {
+      var contentWrapper = document.createElement('div');
+      contentWrapper.setAttribute('class', 'tasksContentWrapper');
+  
+      var content = document.createElement('div');
+      content.setAttribute('class', 'tasksContent');
+  
+      var checkbox = document.createElement('input');
+      checkbox.setAttribute('type', 'checkbox');
+  
+      var name = document.createElement('h3');
+      name.innerText = loc_name;
+  
+      var taskList = document.createElement('ul');
+  
+      for (let task of tasks) {
+        var item = document.createElement('li');
+        item.innerText = task;
+        taskList.appendChild(item);
+      }
+  
+      content.appendChild(checkbox);
+      content.appendChild(name);
+      content.appendChild(taskList);
+  
+      contentWrapper.appendChild(content);
+  
+      document.getElementById('tasks').appendChild(contentWrapper);
+    }
+  
+    function addAllPeople() {
+  
+      let tasks_temp = {{ tasks|safe }}
+  
+      let tasks = [];
+
+      for (let x of tasks_temp) {
+        tasks.push(JSON.parse(x));
+      }
+
+      var users = [];
+      
+      for (let t of tasks) {
+    
+        let locator = t.loc_name;
+        users.push(locator);
+    
+      }
+    
+      for (let l of users) {
+        var tasksOfUser = [];
+    
+        for (let t of tasks) {
+          if (t.loc_name == l) {
+            tasksOfUser.push(t.task_name);
+          }
+        }
+
+        addNewPerson(l, tasksOfUser);
+      }
+    }
+    
+    addAllPeople();
+    
+  </script>
+
+</body>
 {% endblock content %}
 

@@ -24,9 +24,23 @@ def index(request: HttpRequest):
     today_date = date.today()
     monday_date = today_date - timedelta(days = today_date.weekday())
     
-    week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
-    tasks = TasksInWeek.objects.get(week_id = week)
-    context = {"tasks": tasks}
+    context = {"tasks": ""}
+
+    try:
+        week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
+        tasks = list(TasksInWeek.objects.all().filter(week_id = week))
+        result = []
+        for task in tasks:
+            result.append(
+                json.dumps({"task_name": str(task.task_id.name),
+                "loc_name": str(task.locator_id.username),
+                "is_done": str(task.is_done)})
+            )
+        context = {"tasks": result}
+    except Exception:
+        pass
+
+    print(context["tasks"][0])
 
     return render(request, "index.html", context)
 
