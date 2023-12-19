@@ -45,7 +45,7 @@
 
 </style>
 
-<h1>Manage tasks</h1>
+<h1>✏️  Manage tasks</h1>
 
 <div id="manage">
   <div class="card verticalList">
@@ -65,7 +65,8 @@
         <p>Start: <b>{{ week.start_date }}</b></p>
         <p>End: <b>{{ week.end_date}}</b></p>
         <p>Tasks: <b>{{ week.count}}</b></p>
-        <button onClick="deleteItem({{ week.id }}, 'week')">Delete</a>
+        <button onClick="deleteItem({{ week.id }}, 'week')">Delete</button>
+        <a class="button" href="{% url 'week_details' date=week.start_date %}" >Details </a>
       </div>
     {% endfor %}
   </div>

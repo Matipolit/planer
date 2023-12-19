@@ -77,6 +77,9 @@ a {
 
 button, .button {
   color: var(--text);
+  font-size: medium;
+  text-decoration: none;
+  padding: 3px;
 }
 
 button, .button, .nav {

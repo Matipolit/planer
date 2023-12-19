@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <a class="button" href="{% url 'tasks_manage' %}" style="margin: 4px;"> Go back</a>
+<h1>Week {{ week.start_date }} - {{ week.end_date }}</h1>
+
+<div>
+
+  <div class="card verticalList">
+    <h2>List of tasks</h2>
+    {% for task in tasks %}
+      <div class="task item">
+        <p>Name: <b>{{ task.task_id.name }}</b></p>
+        <p>Every <b>{{ task.task_id.frequency }}</b> weeks</p>
+        <p>Locator: <b>{{ task.locator_id.username }}</b></p>
+        <p>Is done: <b>{{ task.is_done }}</b></p>
+        <button onClick="deleteItem({{ task.id }}, 'taskInWeek')">Delete</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}

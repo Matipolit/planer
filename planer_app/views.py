@@ -86,6 +86,14 @@ def tasks_manage(request):
     context = {"tasks": tasks, "today": monday_date.strftime("%Y-%m-%d"), "weeks": weeks}
     return render(request, "tasks_manage.html", context)
 
+
+@staff_member_required(login_url="login")
+def week_details(request, date):
+    week = Week.objects.get(start_date = date)
+    tasks = TasksInWeek.objects.all().filter(week_id = week.id)
+    context = {"tasks": tasks, "week": week}
+    return render(request, "week.html", context)
+
 @staff_member_required(login_url="login")
 def users_manage(request):
     if(request.method == "POST"):
