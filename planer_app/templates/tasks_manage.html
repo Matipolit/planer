@@ -81,7 +81,7 @@
   </form>
   <form class="card" method="post">
     {% csrf_token %}
-    <h2>Generate tasks</h2>
+    <h2>Generate weeks</h2>
     <input type="hidden" id="formtype" name="formtype" value="generate"> 
     <label for="beg_date">From date:</label><br>
     <input type="date" name="beg_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br>

@@ -11,7 +11,7 @@ from datetime import date, timedelta, datetime
 def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
     currentDate = startDate
     idx = 0
-    while currentDate <= endDate:
+    while currentDate < endDate:
         yield (currentDate, idx)
         idx += 1
         currentDate += delta
