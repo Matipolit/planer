@@ -10,12 +10,12 @@
   <div class="card verticalList">
     <h2>List of tasks</h2>
     {% for task in tasks %}
-      <div class="task item">
+      <div id="task_{{ task.task_id.id }}_inweek_{{ task.week_id.id }}" class="task item">
         <p>Name: <b>{{ task.task_id.name }}</b></p>
         <p>Every <b>{{ task.task_id.frequency }}</b> weeks</p>
         <p>Locator: <b>{{ task.locator_id.username }}</b></p>
         <p>Is done: <b>{{ task.is_done }}</b></p>
-        <button onClick="deleteItem({{ task.id }}, 'taskInWeek')">Delete</a>
+        <button onClick="deleteItem({{ task.id }}, 'taskInWeek')">Delete</button>
       </div>
     {% endfor %}
   </div>

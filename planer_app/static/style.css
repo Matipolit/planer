@@ -41,7 +41,8 @@ body {
 }
 
 .content {
-  padding: 8px;
+    padding: 8px;
+    overflow: auto;
 }
 
 a {
@@ -73,6 +74,27 @@ a {
   display: flex;
   gap: 6px;
   flex-direction: column;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-top: 0;
+}
+
+.verticalList > h2 {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-2) 75%, rgba(17,17,17,0) 100%);
+    padding: 26px 6px 16px;
+    margin: 0;
+}
+
+.error {
+    background-color: #611018;
+    color: #eacaca;
+}
+
+.errors{
+    background-color: rgba(34,7,7,0.8);
+    color: white;
 }
 
 button, .button {

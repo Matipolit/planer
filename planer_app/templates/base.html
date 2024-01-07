@@ -23,6 +23,14 @@
         {% endwith %}
         {% endif %}
         <div class="content">
+        {% if errors != null and errors|length != 0 %}
+            <div class="card errors">
+                <h2>Errors encountered</h2>
+                {% for error in errors %}
+                    <p class="item error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
             {% block content %}{% endblock content %}
         </div>
     </body>
