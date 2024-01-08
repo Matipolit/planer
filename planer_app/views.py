@@ -21,22 +21,43 @@ def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
 # views
 @login_required(login_url='login')
 def index(request: HttpRequest):
+
     today_date = date.today()
     monday_date = today_date - timedelta(days = today_date.weekday())
     
     context = {"tasks": ""}
 
+    if request.method == "POST":
+        for k, v in request.POST.items():
+            print(k)
+            print(v)
+            task = Task.objects.all().filter(name = k)
+            if task:
+                week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
+                instance = TasksInWeek.objects.all().filter(week_id = week).get(task_id = task[0])
+                if v == "on":
+                    instance.is_done = True
+                else:
+                    instance.is_done = False
+                instance.save()
+
+    
+
     try:
         week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
         tasks = list(TasksInWeek.objects.all().filter(week_id = week))
         result = []
+        users = []
         for task in tasks:
             result.append(
-                json.dumps({"task_name": str(task.task_id.name),
+                {"task_name": str(task.task_id.name),
                 "loc_name": str(task.locator_id.username),
-                "is_done": str(task.is_done)})
+                "is_done": str(task.is_done)}
             )
-        context = {"tasks": result}
+            users.append(str(task.locator_id.username))
+        users = set(users)
+        users = list(users)
+        context = {"tasks": result, "users": users}
     except Exception:
         pass
 

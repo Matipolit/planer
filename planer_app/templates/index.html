@@ -7,78 +7,56 @@
   <h1>Your tasks</h1>
   <div class="tasksWrapper">
     <div id="tasks" class="tasks">
+      {% for user in users %}
+        <div class="tasksContentWrapper">
+          <div class="tasksContent">
+            <h3>{{user}}</h3>
+            <ul>
+              {% for task in tasks %}
+              {% if user == task.loc_name %}
+              <li class="listItem">
+                  <label>{{task.task_name}}</label>
+                  <form name="{{task.task_name}}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name={{task.task_name}} value = "0">
+                    {% if task.is_done == "True" %}
+                      <input type="checkbox" name="{{task.task_name}}" checked>
+                    {% else %}
+                      <input type="checkbox" name="{{task.task_name}}">
+                    {% endif %}
+                  </form>
+              </li>
+              {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
     </div>
   </div>
 
   <script>
 
+    document.addEventListener('DOMContentLoaded', function() {
 
-    // params - name, tasks
-    function addNewPerson(loc_name, tasks) {
-      var contentWrapper = document.createElement('div');
-      contentWrapper.setAttribute('class', 'tasksContentWrapper');
-  
-      var content = document.createElement('div');
-      content.setAttribute('class', 'tasksContent');
-  
-      var checkbox = document.createElement('input');
-      checkbox.setAttribute('type', 'checkbox');
-  
-      var name = document.createElement('h3');
-      name.innerText = loc_name;
-  
-      var taskList = document.createElement('ul');
-  
-      for (let task of tasks) {
-        var item = document.createElement('li');
-        item.innerText = task;
-        taskList.appendChild(item);
-      }
-  
-      content.appendChild(checkbox);
-      content.appendChild(name);
-      content.appendChild(taskList);
-  
-      contentWrapper.appendChild(content);
-  
-      document.getElementById('tasks').appendChild(contentWrapper);
-    }
-  
-    function addAllPeople() {
-  
-      let tasks_temp = {{ tasks|safe }}
-  
-      let tasks = [];
+      var checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
-      for (let x of tasks_temp) {
-        tasks.push(JSON.parse(x));
-      }
+      console.log(checkboxes);
 
-      var users = [];
-      
-      for (let t of tasks) {
-    
-        let locator = t.loc_name;
-        users.push(locator);
-    
-      }
-    
-      for (let l of users) {
-        var tasksOfUser = [];
-    
-        for (let t of tasks) {
-          if (t.loc_name == l) {
-            tasksOfUser.push(t.task_name);
-          }
+      for (checkbox of checkboxes) {
+        checkbox.addEventListener('change', function() {
+          var forms = document.forms;
+          for (var i = 0; i < forms.length; i++) {
+            if (forms[i].name === checkbox.name) {
+                forms[i].submit();
+            }
         }
-
-        addNewPerson(l, tasksOfUser);
+      });
       }
-    }
-    
-    addAllPeople();
-    
+    });
+
   </script>
+
 
 </body>
 {% endblock content %}
