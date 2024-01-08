@@ -1,6 +1,90 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Your expenses</h1>
+
+<style>
+  #manage {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    align-content: flex-start;
+  }
+</style>
+
+</style>
+
+<h1>Expenses</h1>
+
+<div id="purchases" style="display: flex">
+  <div class="card verticalList">
+    <h2>Purchase requests</h2>
+    {% for purchase in purchases %}
+      <div class="purchase item">
+        <p>ID: <b>{{ purchase.id }}</b></p>
+        <p>Purchase name: <b>{{ purchase.name }}</b></p>
+        <p>Price: <b>{{ purchase.price }}</b></p>
+        <p>Amount: <b>{{ purchase.amount }}</b></p>
+        <p>Buyer: <b>{{ purchase.locator_id }}</b></p>
+      </div>
+    {% endfor %}
+  </div>
+
+<form id="addPurchase" class="card" method="post">
+    <input type="hidden" id="formtype" name="formtype" value="to_purchase">
+    {% csrf_token %}
+    <h2>Add purchase request</h2>
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name"><br>
+    <label for="price">Price</label><br>
+    <input type="number" id="price" name="price"><br>
+    <label for="amount">Amount</label><br>
+    <input type="number" id="amount" name="amount"><br>
+
+    <input class="button" type="submit" value="submit">
+  </form>
+
+<form id="purchased" class="card" method="post">
+    <input type="hidden" id="formtype" name="formtype" value="purchased">
+    {% csrf_token %}
+    <h2>I purchased:</h2>
+    <label for="purchase_id">Request ID:</label><br>
+    <input type="number" id="purchase_id" name="purchase_id"><br>
+    <label for="username">Indebted user:</label><br>
+    <input type="text" id="username" name="username"><br>
+
+    <input class="button" type="submit" value="submit">
+  </form>
+
+<div class="card verticalList">
+    <h2>Debts:</h2>
+    {% for debt in debts %}
+      <div class="debts">
+        <p>Debt ID: <b>{{ debt.id }}</b></p>
+        <p>Purchase ID: <b>{{ debt.purchase_id.id }}</b></p>
+        <p>Indebted: <b>{{ debt.locator_id }}</b></p>
+        <p>Buyer: <b>{{ debt.purchase_id.locator_id }}</b></p>
+        <p>Amount: <b>{{ debt.purchase_id.amount }}</b></p>
+        <p>Is paid?: <b>{{ debt.is_paid }}</b></p>
+      </div>
+    {% endfor %}
+  </div>
+
+<form id="pay_debt" class="card" method="post">
+    <input type="hidden" id="formtype" name="formtype" value="pay_debt">
+    {% csrf_token %}
+    <h2>Pay debt:</h2>
+    <label for="debt_id">Debt ID:</label><br>
+    <input type="number" id="debt_id" name="debt_id"><br>
+
+    <input class="button" type="submit" value="submit">
+  </form>
+
+
+
+</div>
+
+
+
+
 {% endblock content %}
 

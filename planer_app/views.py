@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from .models import Task, User, TasksInWeek, Week
+from .models import Task, User, TasksInWeek, Week, Purchase, Debt
 import json 
 from datetime import date, timedelta, datetime
 
@@ -33,7 +33,35 @@ def index(request: HttpRequest):
 
 @login_required(login_url='login')
 def expenses(request: HttpRequest):
-    return render(request, "expenses.html")
+    if(request.method == "POST"):
+        vars = request.POST
+        type = vars["formtype"]
+
+        if(type=="to_purchase"):
+            Purchase.objects.create(name=vars["name"], price=vars["price"], amount=vars["amount"])
+        elif(type=="purchased"):
+            indebted_user = User.objects.get(username=vars['username'])
+            purchase = Purchase.objects.get(id=vars['purchase_id'])
+
+            purchase.locator_id = request.user
+            purchase.save()
+
+            Debt.objects.create(purchase_id=purchase,locator_id=indebted_user, is_paid=False)
+        elif(type=="pay_debt"):
+            debt = Debt.objects.get(id=vars["debt_id"])
+            debt.is_paid = True
+            debt.save()
+
+
+
+
+
+
+    purchases = Purchase.objects.all()
+    debts = Debt.objects.all()
+    context = {'purchases': purchases, 'debts': debts, 'user': request.user}
+
+    return render(request, "expenses.html", context)
 
 @staff_member_required(login_url="login")
 def tasks_manage(request):
