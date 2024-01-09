@@ -6,7 +6,7 @@
 
   async function deleteItem(id, table) {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    console.log("deleting " + table +" with id: " + id);
+    console.log("requesting delete " + table +" with id: " + id);
     const response = await fetch("", {
       method: "DELETE",
         headers: {
@@ -22,7 +22,13 @@
       )
     })
     console.log("response: " + response);
-    location.reload();
+    response.json().then(data => {
+      console.log(data);
+      if (data.deleted == "true") {
+        console.log("delete successful, deleting element " + table +" with id: " + id);
+        document.getElementById(table + "_" + id).remove();
+      }
+    });
   }
   window.onload = (event) => {
     const slider = document.getElementById("frequency");
@@ -45,48 +51,55 @@
 
 </style>
 
-<h1>Manage tasks</h1>
+<h1>✏️  Manage tasks</h1>
 
 <div id="manage">
   <div class="card verticalList">
-    <h2>List of tasks</h2>
+    <h2>Tasks to add</h2>
     {% for task in tasks %}
-      <div class="task item">
+      <div id="task_{{ task.id }}" class="task item">
         <p>Name: <b>{{ task.name }}</b></p>
         <p>Every <b>{{ task.frequency }}</b> weeks</p>
-        <button onClick="deleteItem({{ task.id }}, 'task')">Delete</a>
+        <button onClick="deleteItem({{ task.id }}, 'task')">Delete</button>
       </div>
     {% endfor %}
   </div>
-  <div class="card verticalList">
-    <h2>List of weeks</h2>
-    {% for week in weeks%}
-      <div class="item">
-        <p>Start: <b>{{ week.start_date }}</b></p>
-        <p>End: <b>{{ week.end_date}}</b></p>
-        <p>Tasks: <b>{{ week.count}}</b></p>
-        <button onClick="deleteItem({{ week.id }}, 'week')">Delete</a>
-      </div>
-    {% endfor %}
-  </div>
+
   <form id="addTask" class="card" method="post">
-    <input type="hidden" id="formtype" name="formtype" value="task"> 
+    <input type="hidden" id="formtype" name="formtype" value="task">
     {% csrf_token %}
-    <h2>Add task</h2>
+    <h2>Add new task</h2>
     <label for="name">Name:</label><br>
     <input type="text" id="name" name="name"><br>
     <label id="for_frequency" for="frequency">Every 1 week</label><br>
     <input type="range" id="frequency" name="frequency" min="1" max="51" value="1"><br><br>
     <input class="button" type="submit" value="submit">
   </form>
+
+  <div class="card verticalList">
+    <h2>Generated weeks</h2>
+    {% for week in weeks%}
+      <div id="week_{{ week.id }}" class="item">
+        <p>Start: <b>{{ week.start_date }}</b></p>
+        <p>End: <b>{{ week.end_date}}</b></p>
+        <p>Tasks: <b>{{ week.count}}</b></p>
+        <button onClick="deleteItem({{ week.id }}, 'week')">Delete</button>
+        <a class="button" href="{% url 'week_details' date=week.start_date %}" >Details </a>
+      </div>
+    {% endfor %}
+  </div>
+
   <form class="card" method="post">
     {% csrf_token %}
     <h2>Generate weeks</h2>
     <input type="hidden" id="formtype" name="formtype" value="generate"> 
     <label for="beg_date">From date:</label><br>
-    <input type="date" name="beg_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br>
-    <label for="beg_date">To date:</label><br>
-    <input type="date" name="end_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br><br>
+    <input id="beg_date" type="date" name="beg_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br>
+    <label for="end_date">To date:</label><br>
+    <input id="end_date" type="date" name="end_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br><br>
+    <input id="include_admin" type="checkbox" name="include_admin">
+    <label for="include_admin">Include admin in tasks</label><br><br>
+
     <input class="button" type="submit" value="submit">
   </form>
 </div>
