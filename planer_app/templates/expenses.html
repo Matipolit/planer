@@ -2,5 +2,116 @@
 
 {% block content %}
 <h1>💰 Your expenses</h1>
-{% endblock content %}
 
+<style>
+  #purchases {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    align-content: flex-start;
+  }
+</style>
+
+<script>
+
+function payPurchase(id){
+    document.getElementById("purchase_id").value = id;
+    showWindow("payPurchase");
+}
+
+</script>
+
+<h1>Expenses</h1>
+
+{# Popup windows #}
+<div id="windowBackground" class="windowBackground">
+
+    <div id="addPurchase" class="popupWindow card">
+        <div class="windowHeader">
+            <h2>Add item to shopping list</h2>
+            <button onclick="closeWindow('addPurchase')">Close</button>
+        </div>
+
+        <form method="post">
+            <input type="hidden" id="formtype" name="formtype" value="to_purchase">
+            {% csrf_token %}
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name"><br>
+            <label for="price">Price</label><br>
+            <input type="number" id="price" name="price" step=".01" min="0.01"><br>
+            <label for="amount">Amount</label><br>
+            <input type="number" id="amount" name="amount" min="1"><br>
+
+            <input class="button" type="submit" value="submit">
+        </form>
+    </div>
+
+    <div id="payPurchase" class="popupWindow card">
+        <div class="windowHeader">
+            <h2>Pay for item</h2>
+            <button onclick="closeWindow('payPurchase')">Close</button>
+        </div>
+
+        <form method="post">
+            <input type="hidden" id="formtype" name="formtype" value="purchased">
+            {% csrf_token %}
+            <h2>I purchased:</h2>
+            <label for="purchase_id">Request ID:</label><br>
+            <input type="number" id="purchase_id" name="purchase_id" min="0"><br>
+            <label for="username">Indebted user:</label><br>
+            <input type="text" id="username" name="username"><br>
+
+            <input class="button" type="submit" value="submit">
+        </form>
+    </div>
+
+</div>
+
+
+<div id="purchases" style="display: flex">
+  <div class="card verticalList">
+    <h2>Shopping list</h2>
+    <button onclick="showWindow('addPurchase')">Add</button>
+
+    {% for purchase in purchases %}
+      <div class="purchase item">
+        <p>ID: <b>{{ purchase.id }}</b></p>
+        <p>Purchase name: <b>{{ purchase.name }}</b></p>
+        <p>Price: <b>{{ purchase.price }}</b></p>
+        <p>Amount: <b>{{ purchase.amount }}</b></p>
+        {% if purchase.locator_id != None %}
+            <p>Buyer: <b>{{ purchase.locator_id }}</b></p>
+        {% else %}
+          <button onclick="payPurchase({{ purchase.id }})">Buy</button>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+
+<div class="card verticalList">
+    <h2>Debts:</h2>
+    {% for debt in debts %}
+      <div class="item debts">
+        <p>Debt ID: <b>{{ debt.id }}</b></p>
+        <p>Purchase ID: <b>{{ debt.purchase_id.id }}</b></p>
+        <p>Indebted: <b>{{ debt.locator_id }}</b></p>
+        <p>Buyer: <b>{{ debt.purchase_id.locator_id }}</b></p>
+        <p>Amount: <b>{{ debt.purchase_id.amount }}</b></p>
+        {% if debt.is_paid %}
+            <p><b>Paid</b></p>
+        {% else %}
+        <form method="post">
+            <input type="hidden" id="formtype" name="formtype" value="pay_debt">
+            {% csrf_token %}
+            <input type="hidden" id="debt_id" name="debt_id" value="{{ debt.id }}">
+            <input class="button" type="submit" value="Pay">
+        </form>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+{% endblock content %}

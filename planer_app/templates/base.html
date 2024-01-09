@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,4 +35,14 @@
         </div>
     </body>
 </html>
+<script>
+    function showWindow(windowId) {
+        document.getElementById("windowBackground").style.display = "block";
+        document.getElementById(windowId).style.display = "block";
+    }
+    function closeWindow(windowId) {
+        document.getElementById("windowBackground").style.display = "none";
+        document.getElementById(windowId).style.display = "none";
+    }
+</script>
 

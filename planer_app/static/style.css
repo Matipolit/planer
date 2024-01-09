@@ -14,6 +14,20 @@ html {
   background-color: var(--surface-3);
 }
 
+@media (prefers-color-scheme: dark){
+  html {
+    --text: #ECF7FE;
+    --surface: #28343E;
+    --surface-2: #202931;
+    --surface-3: #181F25;
+    --surface-deep: #384957;
+    --accent-dark: #78C4CE;
+    --link: #64BFF7;
+    --border: rgba(118, 145, 167, 0.4);
+  }
+}
+
+
 body {
   margin: 0;
   height: 100%;
@@ -116,18 +130,6 @@ button:hover, .button:hover, .nav:hover {
   background-color: var(--surface-deep);
 }
   
-@media (prefers-color-scheme: dark){
-  html {
-    --text: #ECF7FE;
-    --surface: #28343E;
-    --surface-2: #202931;
-    --surface-3: #181F25;
-    --surface-deep: #384957;
-    --accent-dark: #78C4CE;
-    --link: #64BFF7;
-    --border: rgba(118, 145, 167, 0.4);
-  }
-}
 
 .tasksWrapper {
 	height: 50%;
@@ -169,4 +171,33 @@ button:hover, .button:hover, .nav:hover {
 
 .tasksContent li {
 	text-align: left;
+}
+
+.windowBackground {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: #0006;
+    display: none;
+}
+
+.popupWindow {
+    z-index: 2;
+    max-width: 550px;
+    margin: 64px auto;
+    padding: 16px;
+    border-radius: 4px;
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.windowHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 }
