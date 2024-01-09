@@ -41,8 +41,6 @@ def index(request: HttpRequest):
         for task_id, is_done in request.POST.items():
             if task_id == "csrfmiddlewaretoken":
                 continue
-            # print(task_id)
-            # print(is_done)
             task = Task.objects.all().filter(id = task_id)
             if task:
                 instance = tasks.get(task_id = task[0])
@@ -52,19 +50,25 @@ def index(request: HttpRequest):
                     instance.is_done = False
                 instance.save()
 
+    tasks = None
+
+    try:
+        tasks = TasksInWeek.objects.all().filter(week_id = week)
+    except Exception:
+        pass
+
+    if tasks == None:
+            return render(request, "index.html")
+
     users = []
 
     for task in list(tasks):
-        # print(str(task.is_done))
         users.append(str(task.locator_id.username))
 
     users = set(users)
     users = list(users)
 
     context = {"tasks": tasks, "users": users}
-
-    # print(str(context["tasks"][0]))
-
 
     return render(request, "index.html", context)
 
