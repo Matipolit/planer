@@ -22,12 +22,12 @@ class Purchase(models.Model):
     price = models.DecimalField(max_digits=18, decimal_places=2, null=False, blank=False)
     amount = models.IntegerField(default=1)
     #basic user for now
-    locator_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    locator_id = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
 class Debt(models.Model):
-    purchase_id = models.OneToOneField(Purchase, on_delete=models.CASCADE, null=False, blank=False)
+    purchase_id = models.ForeignKey(Purchase, on_delete=models.CASCADE, null=False, blank=False)
     # basic user for now
-    locator_id = models.OneToOneField(User, on_delete=models.CASCADE, null=False, blank=False)
+    locator_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     is_paid = models.BooleanField(default=False, null=False, blank=False)
 
 class TasksInWeek(models.Model):

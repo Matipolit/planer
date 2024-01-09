@@ -14,6 +14,20 @@ html {
   background-color: var(--surface-3);
 }
 
+@media (prefers-color-scheme: dark){
+  html {
+    --text: #ECF7FE;
+    --surface: #28343E;
+    --surface-2: #202931;
+    --surface-3: #181F25;
+    --surface-deep: #384957;
+    --accent-dark: #78C4CE;
+    --link: #64BFF7;
+    --border: rgba(118, 145, 167, 0.4);
+  }
+}
+
+
 body {
   margin: 0;
   height: 100%;
@@ -41,7 +55,8 @@ body {
 }
 
 .content {
-  padding: 8px;
+    padding: 8px;
+    overflow: auto;
 }
 
 a {
@@ -73,10 +88,34 @@ a {
   display: flex;
   gap: 6px;
   flex-direction: column;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-top: 0;
+}
+
+.verticalList > h2 {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-2) 75%, rgba(17,17,17,0) 100%);
+    padding: 26px 6px 16px;
+    margin: 0;
+}
+
+.error {
+    background-color: #611018;
+    color: #eacaca;
+}
+
+.errors{
+    background-color: rgba(34,7,7,0.8);
+    color: white;
 }
 
 button, .button {
   color: var(--text);
+  font-size: medium;
+  text-decoration: none;
+  padding: 3px;
 }
 
 button, .button, .nav {
@@ -91,18 +130,6 @@ button:hover, .button:hover, .nav:hover {
   background-color: var(--surface-deep);
 }
   
-@media (prefers-color-scheme: dark){
-  html {
-    --text: #ECF7FE;
-    --surface: #28343E;
-    --surface-2: #202931;
-    --surface-3: #181F25;
-    --surface-deep: #384957;
-    --accent-dark: #78C4CE;
-    --link: #64BFF7;
-    --border: rgba(118, 145, 167, 0.4);
-  }
-}
 
 .tasksWrapper {
 	height: 50%;
@@ -155,4 +182,33 @@ button:hover, .button:hover, .nav:hover {
   border-width: 2px;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.windowBackground {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: #0006;
+    display: none;
+}
+
+.popupWindow {
+    z-index: 2;
+    max-width: 550px;
+    margin: 64px auto;
+    padding: 16px;
+    border-radius: 4px;
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.windowHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 }

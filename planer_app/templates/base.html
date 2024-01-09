@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,18 +13,36 @@
         <div class="navbar verticalList">
                 <a class="button" href="/planer/logout" >Log out</a>
                 <h1>Welcome {{user.first_name}}</h1>
-                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">Tasks</a>
-                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">Expenses</a>
+                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">☑️  Tasks</a>
+                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">💰 Expenses</a>
                 {% if user.is_superuser %}
-                <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/planer/tasks_manage/">Manage tasks</a>
-                <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/planer/users_manage/">Manage users</a>
+                <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/planer/tasks_manage/">✏️ Manage tasks</a>
+                <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/planer/users_manage/">🧑‍🤝‍🧑 Manage users</a>
                 {% endif %}
         </div>
         {% endwith %}
         {% endif %}
         <div class="content">
+        {% if errors != null and errors|length != 0 %}
+            <div class="card errors">
+                <h2>Errors encountered</h2>
+                {% for error in errors %}
+                    <p class="item error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
             {% block content %}{% endblock content %}
         </div>
     </body>
 </html>
+<script>
+    function showWindow(windowId) {
+        document.getElementById("windowBackground").style.display = "block";
+        document.getElementById(windowId).style.display = "block";
+    }
+    function closeWindow(windowId) {
+        document.getElementById("windowBackground").style.display = "none";
+        document.getElementById(windowId).style.display = "none";
+    }
+</script>
 
