@@ -13,16 +13,16 @@
             <h3>{{user}}</h3>
             <ul>
               {% for task in tasks %}
-              {% if user == task.loc_name %}
+              {% if user == task.locator_id.username %}
               <li class="listItem">
-                  <label>{{task.task_name}}</label>
-                  <form name="{{task.task_name}}" method="post">
+                  <label>{{task.task_id.name}}</label>
+                  <form name="{{task.task_id.id}}" method="post">
                     {% csrf_token %}
-                    <input type="hidden" name={{task.task_name}} value = "0">
-                    {% if task.is_done == "True" %}
-                      <input type="checkbox" name="{{task.task_name}}" checked>
+                    <input type="hidden" name={{task.task_id.id}} value = "0">
+                    {% if task.is_done %}
+                      <input type="checkbox" name="{{task.task_id.id}}" checked>
                     {% else %}
-                      <input type="checkbox" name="{{task.task_name}}">
+                      <input type="checkbox" name="{{task.task_id.id}}">
                     {% endif %}
                   </form>
               </li>

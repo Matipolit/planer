@@ -24,44 +24,45 @@ def index(request: HttpRequest):
 
     today_date = date.today()
     monday_date = today_date - timedelta(days = today_date.weekday())
-    
-    context = {"tasks": ""}
 
-    if request.method == "POST":
-        for k, v in request.POST.items():
-            print(k)
-            print(v)
-            task = Task.objects.all().filter(name = k)
+    week = None
+
+    try:
+        week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
+        tasks = TasksInWeek.objects.all().filter(week_id = week)
+    except Exception:
+        pass
+
+    if week == None or tasks == None:
+        return render(request, "index.html")
+    
+    if request.method == "POST" :
+        for task_id, is_done in request.POST.items():
+            if task_id == "csrfmiddlewaretoken":
+                continue
+            # print(task_id)
+            # print(is_done)
+            task = Task.objects.all().filter(id = task_id)
             if task:
-                week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
-                instance = TasksInWeek.objects.all().filter(week_id = week).get(task_id = task[0])
-                if v == "on":
+                instance = tasks.get(task_id = task[0])
+                if is_done == "on":
                     instance.is_done = True
                 else:
                     instance.is_done = False
                 instance.save()
 
-    
+    users = []
 
-    try:
-        week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
-        tasks = list(TasksInWeek.objects.all().filter(week_id = week))
-        result = []
-        users = []
-        for task in tasks:
-            result.append(
-                {"task_name": str(task.task_id.name),
-                "loc_name": str(task.locator_id.username),
-                "is_done": str(task.is_done)}
-            )
-            users.append(str(task.locator_id.username))
-        users = set(users)
-        users = list(users)
-        context = {"tasks": result, "users": users}
-    except Exception:
-        pass
+    for task in list(tasks):
+        # print(str(task.is_done))
+        users.append(str(task.locator_id.username))
 
-    print(context["tasks"][0])
+    users = set(users)
+    users = list(users)
+
+    context = {"tasks": tasks, "users": users}
+
+    # print(str(context["tasks"][0]))
 
     return render(request, "index.html", context)
 
