@@ -1,76 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script>
 
+<body>
 
-  // params - name, tasks
-  function addNewPerson(name, tasks) {
-    var contentWrapper = document.createElement('div');
-    contentWrapper.setAttribute('class', 'tasksContentWrapper');
-
-    var content = document.createElement('div');
-    content.setAttribute('class', 'tasksContent');
-
-    var checkbox = document.createElement('input');
-    checkbox.setAttribute('type', 'checkbox');
-
-    var name = document.createElement('h3');
-    name.textContent = name;
-
-    var taskList = document.createElement('ul');
-
-    for (let task of tasks) {
-      var item = document.createElement('li');
-      item.innerText = task;
-      taskList.appendChild(item);
-    }
-
-    content.appendChild(checkbox);
-    content.appendChild(name);
-    content.appendChild(taskList);
-
-    contentWrapper.appendChild(content);
-
-    document.getElementById('tasks').appendChild(contentWrapper);
-  }
-
-  var users = [];
-  
-  {% for task in tasks %}
-
-  var locator = {{ task.locator_id.name }};
-  users.push(locator);
-
-  {% endfor %}
-
-  for (locator of users) {
-    var tasksJS = [];
-
-    {% for task in tasks %}
-
-      {% if task.locator_id.username == locator %}
-      tasksJS.push(task.task_id.name);
-      {% endif %}  
-
-    {% endfor %}
-
-    addNewPerson(locator, tasksJS);
-
-  }
-
-</script>
-
-<h1>Your tasks</h1>
+  <h1>Your tasks</h1>
   <div class="tasksWrapper">
     <div id="tasks" class="tasks">
-      <div class="tasksContentWrapper">
-          <div class="tasksContent">XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br>XD<br></div>
-      </div>
-      <div class="tasksContentWrapper">
-          <div class="tasksContent">XDXDDDDDDDDDDDDDDDDDDDDD</div>
-      </div>
+      {% for user in users %}
+        <div class="tasksContentWrapper">
+          <div class="tasksContent">
+            <h3>{{user}}</h3>
+            <ul>
+              {% for task in tasks %}
+              {% if user == task.locator_id.username %}
+              <li class="listItem">
+                  <label>{{task.task_id.name}}</label>
+                  <form name="{{task.task_id.id}}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name={{task.task_id.id}} value = "0">
+                    {% if task.is_done %}
+                      <input type="checkbox" name="{{task.task_id.id}}" checked>
+                    {% else %}
+                      <input type="checkbox" name="{{task.task_id.id}}">
+                    {% endif %}
+                  </form>
+              </li>
+              {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
     </div>
   </div>
+
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+      var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+      console.log(checkboxes);
+
+      for (checkbox of checkboxes) {
+        checkbox.addEventListener('change', function() {
+          var forms = document.forms;
+          for (var i = 0; i < forms.length; i++) {
+            if (forms[i].name === checkbox.name) {
+                forms[i].submit();
+            }
+        }
+      });
+      }
+    });
+
+  </script>
+
+
+</body>
 {% endblock content %}
 

@@ -169,8 +169,19 @@ button:hover, .button:hover, .nav:hover {
 	text-align: center;
 }
 
-.tasksContent li {
-	text-align: left;
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border: solid;
+  border-radius: 4px;
+  background-color: var(--surface);
+  border-color: var(--border);
+  padding: 4px;
+  border-width: 2px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .windowBackground {

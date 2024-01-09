@@ -22,12 +22,49 @@ def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
 # views
 @login_required(login_url='login')
 def index(request: HttpRequest):
-    today_date = date.today()
-    monday_date = today_date - timedelta(days=today_date.weekday())
 
-    week = Week.objects.get(start_date=monday_date + timedelta(weeks=1))
-    tasks = TasksInWeek.objects.get(week_id=week)
-    context = {"tasks": tasks}
+    today_date = date.today()
+    monday_date = today_date - timedelta(days = today_date.weekday())
+
+    week = None
+
+    try:
+        week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
+        tasks = TasksInWeek.objects.all().filter(week_id = week)
+    except Exception:
+        pass
+
+    if week == None or tasks == None:
+        return render(request, "index.html")
+    
+    if request.method == "POST" :
+        for task_id, is_done in request.POST.items():
+            if task_id == "csrfmiddlewaretoken":
+                continue
+            # print(task_id)
+            # print(is_done)
+            task = Task.objects.all().filter(id = task_id)
+            if task:
+                instance = tasks.get(task_id = task[0])
+                if is_done == "on":
+                    instance.is_done = True
+                else:
+                    instance.is_done = False
+                instance.save()
+
+    users = []
+
+    for task in list(tasks):
+        # print(str(task.is_done))
+        users.append(str(task.locator_id.username))
+
+    users = set(users)
+    users = list(users)
+
+    context = {"tasks": tasks, "users": users}
+
+    # print(str(context["tasks"][0]))
+
 
     return render(request, "index.html", context)
 
