@@ -1,7 +1,41 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block popupwindows %}
+    <div id="addTaskInWeek" class="card popupWindow">
+        <div class="windowHeader">
+            <h2>Add task to week</h2>
+            <button onclick="closeWindow('addTaskInWeek')">X</button>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <label for="task">Task</label>
+            <select id="task_select" name="task">
+                {% for task in tasksNotInWeek %}
+                    <option id="task_option_{{ task.id }}" value="{{ task.id }}">{{ task.name }}</option>
+                {% endfor %}
+            </select>
+            <label for="locator">Locator</label>
+            <select id="locator" name="locator">
+                {% for locator in locators %}
+                    <option value="{{ locator.id }}">{{ locator.first_name}}</option>
+                {% endfor %}
+            </select>
+            <input class="button" type="submit" value="Add">
+        </form>
+    </div>
+{% endblock popupwindows %}
 
+{% block content %}
+<script>
+    function deleteTask(taskInWeekId, taskId, taskName) {
+        deleteItem(taskInWeekId, 'taskInWeek');
+        const newTaskOption = document.createElement('option');
+        newTaskOption.id = 'task_option_' + taskId;
+        newTaskOption.value = taskId;
+        newTaskOption.innerHTML = taskName;
+        document.getElementById("task_select").appendChild(newTaskOption);
+    }
+</script>
   <a class="button" href="{% url 'tasks_manage' %}" style="margin: 4px;"> Go back</a>
 <h1>Week {{ week.start_date }} - {{ week.end_date }}</h1>
 
@@ -10,14 +44,15 @@
   <div class="card verticalList">
       <div class="verticalListHeader">
           <h2>List of tasks</h2>
+          <button onclick="showWindow('addTaskInWeek')">+</button>
       </div>
     {% for task in tasks %}
-      <div id="task_{{ task.task_id.id }}_inweek_{{ task.week_id.id }}" class="task item">
+      <div id="taskInWeek_{{ task.id }}" class="task item">
         <p>Name: <b>{{ task.task_id.name }}</b></p>
         <p>Every <b>{{ task.task_id.frequency }}</b> weeks</p>
         <p>Locator: <b>{{ task.locator_id.username }}</b></p>
         <p>Is done: <b>{{ task.is_done }}</b></p>
-        <button onClick="deleteItem({{ task.id }}, 'taskInWeek')">Delete</button>
+        <button onClick="deleteTask( {{ task.id }},{{ task.task_id.id }}, '{{ task.task_id.name }}' )">Delete</button>
       </div>
     {% endfor %}
   </div>

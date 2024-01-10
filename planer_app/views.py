@@ -166,19 +166,26 @@ def week_details(request, date):
     errors = []
     if request.method == "DELETE":
         vars = json.loads(request.DELETE)
-        task_id = vars["task_id"]
-        week_id = vars["week_id"]
-        type = vars["type"]
-        instance = TasksInWeek.objects.get(task_id=task_id, week_id=week_id)
-        if(instance == None):
+        id = vars["id"]
+        instance = TasksInWeek.objects.get(id=id)
+        if instance is None:
             errors.append("Could not delete - no suchtask in week")
         else:
             print(f"Deleting instance {instance}")
             instance.delete()
             return JsonResponse({"deleted": "true"})
+    elif request.method == "POST":
+        vars = request.POST
+        week = Week.objects.get(start_date=date)
+        task = Task.objects.get(id=vars["task"])
+        locator = User.objects.get(id=vars["locator"])
+        TasksInWeek.objects.create(week_id=week, task_id=task, locator_id=locator, is_done=False)
+
     week = Week.objects.get(start_date=date)
-    tasks = TasksInWeek.objects.all().filter(week_id=week.id)
-    context = {"tasks": tasks, "week": week}
+    tasks = TasksInWeek.objects.filter(week_id=week.id)
+    taskIdsInWeek = tasks.values_list("task_id")
+    tasksNotInWeek = Task.objects.exclude(id__in=taskIdsInWeek)
+    context = {"tasks": tasks, "week": week, "tasksNotInWeek": tasksNotInWeek, 'locators': User.objects.all()}
     return render(request, "week.html", context)
 
 

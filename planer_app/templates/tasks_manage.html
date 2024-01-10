@@ -94,7 +94,7 @@
         <p>End: <b>{{ week.end_date}}</b></p>
         <p>Tasks: <b>{{ week.count}}</b></p>
         <button onClick="deleteItem({{ week.id }}, 'week')">Delete</button>
-        <a class="button" href="{% url 'week_details' date=week.start_date %}" >Details </a>
+        <a class="button" href="{% url 'week_details' date=week.start_date %}" >Edit</a>
       </div>
     {% endfor %}
   </div>
