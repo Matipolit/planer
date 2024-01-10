@@ -1,30 +1,6 @@
 {% extends "base.html" %}
 
-{% block content %}
-<h1>💰 Your expenses</h1>
-
-<style>
-  #purchases {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    align-content: flex-start;
-  }
-</style>
-
-<script>
-
-function payPurchase(id){
-    document.getElementById("purchase_id").value = id;
-    showWindow("payPurchase");
-}
-
-</script>
-
-<h1>Expenses</h1>
-
-{# Popup windows #}
-<div id="windowBackground" class="windowBackground">
+{% block popupwindows %}
 
     <div id="addPurchase" class="popupWindow card">
         <div class="windowHeader">
@@ -64,14 +40,37 @@ function payPurchase(id){
             <input class="button" type="submit" value="submit">
         </form>
     </div>
+{% endblock popupwindows %}
 
-</div>
+{% block content %}
+<h1>💰 Your expenses</h1>
 
+<style>
+  #purchases {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    align-content: flex-start;
+  }
+</style>
+
+<script>
+
+function payPurchase(id){
+    document.getElementById("purchase_id").value = id;
+    showWindow("payPurchase");
+}
+
+</script>
+
+<h1>Expenses</h1>
 
 <div id="purchases" style="display: flex">
   <div class="card verticalList">
+  <div class="verticalListHeader">
     <h2>Shopping list</h2>
-    <button onclick="showWindow('addPurchase')">Add</button>
+    <button onclick="showWindow('addPurchase')">+</button>
+  </div>
 
     {% for purchase in purchases %}
       <div class="purchase item">

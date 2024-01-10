@@ -31,6 +31,9 @@
                 {% endfor %}
             </div>
         {% endif %}
+            <div id="windowBackground" class="windowBackground">
+                {% block popupwindows %}{% endblock popupwindows %}
+            </div>
             {% block content %}{% endblock content %}
         </div>
     </body>
@@ -43,6 +46,33 @@
     function closeWindow(windowId) {
         document.getElementById("windowBackground").style.display = "none";
         document.getElementById(windowId).style.display = "none";
+    }
+
+    async function deleteItem(id, table) {
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        console.log("requesting delete " + table +" with id: " + id);
+        const response = await fetch("", {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": csrftoken,
+                "Content-Type": "application/json",
+                //"Content-Type": "multipart/form-data",
+            },
+            body: JSON.stringify(
+                {
+                    id: id,
+                    type: table,
+                }
+            )
+        })
+        console.log("response: " + response);
+        response.json().then(data => {
+            console.log(data);
+            if (data.deleted == "true") {
+                console.log("delete successful, deleting element " + table +" with id: " + id);
+                document.getElementById(table + "_" + id).remove();
+            }
+        });
     }
 </script>
 

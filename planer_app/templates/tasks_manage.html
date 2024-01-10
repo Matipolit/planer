@@ -1,41 +1,55 @@
 {% extends "base.html" %}
 
+{% block popupwindows %}
+
+    <div id="addTaskWindow" class="popupWindow card">
+        <div class="windowHeader">
+            <h2>Add new task</h2>
+            <button onclick="closeWindow('addTaskWindow')">Close</button>
+        </div>
+        <form id="addTask"  method="post">
+            <input type="hidden" id="formtype" name="formtype" value="task">
+            {% csrf_token %}
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name"><br>
+            <label id="for_frequency" for="frequency">Every 1 week</label><br>
+            <input type="range" id="frequency" name="frequency" min="1" max="51" value="1"><br><br>
+            <input class="button" type="submit" value="submit">
+        </form>
+    </div>
+
+    <div id="generateWeeksWindow" class="popupWindow card">
+        <div class="windowHeader">
+            <h2>Generate weeks</h2>
+            <button onclick="closeWindow('generateWeeksWindow')">X</button>
+        </div>
+        <form  method="post">
+            {% csrf_token %}
+            <input type="hidden" id="formtype" name="formtype" value="generate">
+            <label for="beg_date">From date:</label><br>
+            <input id="beg_date" type="date" name="beg_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br>
+            <label for="end_date">To date:</label><br>
+            <input id="end_date" type="date" name="end_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br><br>
+            <input id="include_admin" type="checkbox" name="include_admin">
+            <label for="include_admin">Include admin in tasks</label><br><br>
+
+            <input class="button" type="submit" value="submit">
+        </form>
+    </div>
+
+{% endblock popupwindows %}
+
+
 {% block content %}
 
 <script>
 
-  async function deleteItem(id, table) {
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    console.log("requesting delete " + table +" with id: " + id);
-    const response = await fetch("", {
-      method: "DELETE",
-        headers: {
-        "X-CSRFToken": csrftoken,
-        "Content-Type": "application/json",
-        //"Content-Type": "multipart/form-data",
-      },
-      body: JSON.stringify(
-        {
-          id: id,
-          type: table,
-        }
-      )
-    })
-    console.log("response: " + response);
-    response.json().then(data => {
-      console.log(data);
-      if (data.deleted == "true") {
-        console.log("delete successful, deleting element " + table +" with id: " + id);
-        document.getElementById(table + "_" + id).remove();
-      }
-    });
-  }
-  window.onload = (event) => {
+  window.onload = () => {
     const slider = document.getElementById("frequency");
     const label = document.getElementById("for_frequency");
     slider.addEventListener("input", (event) => {
       label.textContent = "Every " + event.target.value + " weeks";
-    })  
+    })
   };
 
 </script>
@@ -55,7 +69,10 @@
 
 <div id="manage">
   <div class="card verticalList">
-    <h2>Tasks to add</h2>
+    <div class="verticalListHeader">
+      <h2>Tasks</h2>
+      <button onclick="showWindow('addTaskWindow')">+</button>
+    </div>
     {% for task in tasks %}
       <div id="task_{{ task.id }}" class="task item">
         <p>Name: <b>{{ task.name }}</b></p>
@@ -65,19 +82,12 @@
     {% endfor %}
   </div>
 
-  <form id="addTask" class="card" method="post">
-    <input type="hidden" id="formtype" name="formtype" value="task">
-    {% csrf_token %}
-    <h2>Add new task</h2>
-    <label for="name">Name:</label><br>
-    <input type="text" id="name" name="name"><br>
-    <label id="for_frequency" for="frequency">Every 1 week</label><br>
-    <input type="range" id="frequency" name="frequency" min="1" max="51" value="1"><br><br>
-    <input class="button" type="submit" value="submit">
-  </form>
 
   <div class="card verticalList">
-    <h2>Generated weeks</h2>
+      <div class="verticalListHeader">
+          <h2>Generated weeks</h2>
+          <button onclick="showWindow('generateWeeksWindow')">+</button>
+      </div>
     {% for week in weeks%}
       <div id="week_{{ week.id }}" class="item">
         <p>Start: <b>{{ week.start_date }}</b></p>
@@ -89,19 +99,7 @@
     {% endfor %}
   </div>
 
-  <form class="card" method="post">
-    {% csrf_token %}
-    <h2>Generate weeks</h2>
-    <input type="hidden" id="formtype" name="formtype" value="generate"> 
-    <label for="beg_date">From date:</label><br>
-    <input id="beg_date" type="date" name="beg_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br>
-    <label for="end_date">To date:</label><br>
-    <input id="end_date" type="date" name="end_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br><br>
-    <input id="include_admin" type="checkbox" name="include_admin">
-    <label for="include_admin">Include admin in tasks</label><br><br>
 
-    <input class="button" type="submit" value="submit">
-  </form>
 </div>
 
 {% endblock content %}

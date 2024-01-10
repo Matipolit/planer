@@ -8,7 +8,9 @@
 <div>
 
   <div class="card verticalList">
-    <h2>List of tasks</h2>
+      <div class="verticalListHeader">
+          <h2>List of tasks</h2>
+      </div>
     {% for task in tasks %}
       <div id="task_{{ task.task_id.id }}_inweek_{{ task.week_id.id }}" class="task item">
         <p>Name: <b>{{ task.task_id.name }}</b></p>
