@@ -1,11 +1,13 @@
+from typing import Any, Type
+
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponse, HttpRequest, JsonResponse
+from django.http import HttpResponse, HttpRequest, JsonResponse, QueryDict
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
 from .models import Task, User, TasksInWeek, Week, Purchase, Debt
-import json 
+import json
 from datetime import date, timedelta, datetime
 
 
@@ -22,30 +24,29 @@ def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
 # views
 @login_required(login_url='login')
 def index(request: HttpRequest):
-
     today_date = date.today()
-    monday_date = today_date - timedelta(days = today_date.weekday())
+    monday_date = today_date - timedelta(days=today_date.weekday())
 
     week = None
 
     try:
-        week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
-        tasks = TasksInWeek.objects.all().filter(week_id = week)
+        week = Week.objects.get(start_date=monday_date + timedelta(weeks=1))
+        tasks = TasksInWeek.objects.all().filter(week_id=week)
     except Exception:
         pass
 
     if week == None or tasks == None:
         return render(request, "index.html")
-    
-    if request.method == "POST" :
+
+    if request.method == "POST":
         for task_id, is_done in request.POST.items():
             if task_id == "csrfmiddlewaretoken":
                 continue
             # print(task_id)
             # print(is_done)
-            task = Task.objects.all().filter(id = task_id)
+            task = Task.objects.all().filter(id=task_id)
             if task:
-                instance = tasks.get(task_id = task[0])
+                instance = tasks.get(task_id=task[0])
                 if is_done == "on":
                     instance.is_done = True
                 else:
@@ -65,51 +66,63 @@ def index(request: HttpRequest):
 
     # print(str(context["tasks"][0]))
 
-
     return render(request, "index.html", context)
 
+def get_my_debts_by_person(all_debts, user):
+    my_debts = all_debts.filter(locator_id=user, is_paid=False)
+    my_debts_by_person = dict()
+    for debt in my_debts:
+        if debt.purchase_id.locator_id not in my_debts_by_person:
+            my_debts_by_person[debt.purchase_id.locator_id] = {"sum": 0, "debts": []}
+        my_debts_by_person[debt.purchase_id.locator_id]["sum"] += debt.owed_by_locator(all_debts)
+        my_debts_by_person[debt.purchase_id.locator_id]["debts"].append(debt)
+    return my_debts_by_person
 
 @login_required(login_url='login')
 def expenses(request: HttpRequest):
-    if(request.method == "POST"):
+    my_debts_by_person = get_my_debts_by_person(Debt.objects.all(), request.user)
+
+    if (request.method == "POST"):
         vars = request.POST
         type = vars["formtype"]
-
-        if(type=="to_purchase"):
+        if (type == "to_purchase"):
             Purchase.objects.create(name=vars["name"], price=vars["price"], amount=vars["amount"])
-        elif(type=="purchased"):
-            indebted_user = User.objects.get(username=vars['username'])
-            purchase = Purchase.objects.get(id=vars['purchase_id'])
+        elif (type == "purchased"):
+            purchase = Purchase.objects.get(id=vars["purchase_id"])
+            indebted: Type[QueryDict[int]] = vars["indebted"]
 
             purchase.locator_id = request.user
             purchase.save()
 
-            Debt.objects.create(purchase_id=purchase,locator_id=indebted_user, is_paid=False)
-        elif(type=="pay_debt"):
-            debt = Debt.objects.get(id=vars["debt_id"])
-            debt.is_paid = True
-            debt.save()
+            for id in indebted:
+                Debt.objects.create(purchase_id=purchase, locator_id=User.objects.get(id=id), is_paid=False)
+        elif (type == "pay_all_debts"):
+            debts_to_pay = my_debts_by_person[User.objects.get(id=vars["locator_id"])]["debts"]
+            for debt in debts_to_pay:
+                debt.is_paid = True
+                debt.save()
 
+            my_debts_by_person = get_my_debts_by_person(Debt.objects.all(), request.user)
 
-    purchases = Purchase.objects.all()
-    debts = Debt.objects.all()
-    context = {'purchases': purchases, 'debts': debts, 'user': request.user}
+    to_purchase = Purchase.objects.filter(locator_id=None)
+
+    users = User.objects.exclude(id=request.user.id)
+    context = {'to_purchase': to_purchase, 'debts': my_debts_by_person, 'user': request.user, 'users': users}
 
     return render(request, "expenses.html", context)
 
 
 @staff_member_required(login_url="login")
 def tasks_manage(request):
-    errors=[]
+    errors = []
     if (request.method == "POST"):
         vars = request.POST
         type = vars["formtype"]
 
-
         if (type == "task"):
             Task.objects.create(name=vars["name"], frequency=vars["frequency"])
         elif (type == "generate"):
-            
+
             tasks = Task.objects.all()
             if vars["beg_date"] == "" or vars["end_date"] == "":
                 errors.append("Dates not selected. Please fill in all the fields")
@@ -132,7 +145,8 @@ def tasks_manage(request):
                         print(f"Checking to add task {task} with freq {task.frequency} and idx of week {idx}")
                         if (idx % task.frequency == 0):
                             print(f"Task elegible to add")
-                            taskInWeek = TasksInWeek.objects.create(locator_id=locators[idx % locatorsNum], task_id=task,
+                            taskInWeek = TasksInWeek.objects.create(locator_id=locators[idx % locatorsNum],
+                                                                    task_id=task,
                                                                     week_id=week, is_done=False)
                             print(taskInWeek)
 
@@ -193,12 +207,12 @@ def week_details(request, date):
 def users_manage(request):
     if (request.method == "POST"):
         vars = request.POST
-        User.objects.create(is_superuser="admin" in vars.keys(),
-                            email=vars["email"],
-                            username=vars["username"],
-                            first_name=vars["first_name"],
-                            last_name=vars["last_name"],
-                            password=vars["password"])
+        User.objects.create_user(is_superuser="admin" in vars.keys(),
+                                 email=vars["email"],
+                                 username=vars["username"],
+                                 first_name=vars["first_name"],
+                                 last_name=vars["last_name"],
+                                 password=vars["password"])
 
     elif (request.method == "DELETE"):
         vars = json.loads(request.DELETE)

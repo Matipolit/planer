@@ -34,8 +34,11 @@
             <h2>I purchased:</h2>
             <label for="purchase_id">Request ID:</label><br>
             <input type="number" id="purchase_id" name="purchase_id" min="0"><br>
-            <label for="username">Indebted user:</label><br>
-            <input type="text" id="username" name="username"><br>
+            <label>Indebted users:</label><br>
+            {% for user in users %}
+                <input type="checkbox" id="username_{{ user.id }}" name="indebted" value="{{ user.id}}">
+                <label for="username_{{ user.id }}">{{ user.username }}</label><br>
+            {% endfor %}
 
             <input class="button" type="submit" value="submit">
         </form>
@@ -46,7 +49,7 @@
 <h1>💰 Your expenses</h1>
 
 <style>
-  #purchases {
+  #expenses {
     display: flex;
     gap: 8px;
     align-items: flex-start;
@@ -65,17 +68,21 @@ function payPurchase(id){
 
 <h1>Expenses</h1>
 
-<div id="purchases" style="display: flex">
+<div id="expenses" style="display: flex">
   <div class="card verticalList">
-  <div class="verticalListHeader">
-    <h2>Shopping list</h2>
-    <button onclick="showWindow('addPurchase')">+</button>
-  </div>
+      <div class="verticalListHeader">
+        <h2>Shopping list</h2>
+        <button onclick="showWindow('addPurchase')">+</button>
+      </div>
 
-    {% for purchase in purchases %}
+    {%  if to_purchase|length == 0 %}
+
+        <p>Empty</p>
+
+    {% endif %}
+    {% for purchase in to_purchase %}
       <div class="purchase item">
-        <p>ID: <b>{{ purchase.id }}</b></p>
-        <p>Purchase name: <b>{{ purchase.name }}</b></p>
+        <p>Item: <b>{{ purchase.name }}</b></p>
         <p>Price: <b>{{ purchase.price }}</b></p>
         <p>Amount: <b>{{ purchase.amount }}</b></p>
         {% if purchase.locator_id != None %}
@@ -89,24 +96,21 @@ function payPurchase(id){
 
 
 <div class="card verticalList">
-    <h2>Debts:</h2>
-    {% for debt in debts %}
+    <h2>Your debts:</h2>
+    {% if debts|length == 0 %}
+        <p>Empty</p>
+    {% endif %}
+    {% for user, debt_list in debts.items %}
       <div class="item debts">
-        <p>Debt ID: <b>{{ debt.id }}</b></p>
-        <p>Purchase ID: <b>{{ debt.purchase_id.id }}</b></p>
-        <p>Indebted: <b>{{ debt.locator_id }}</b></p>
-        <p>Buyer: <b>{{ debt.purchase_id.locator_id }}</b></p>
-        <p>Amount: <b>{{ debt.purchase_id.amount }}</b></p>
-        {% if debt.is_paid %}
-            <p><b>Paid</b></p>
-        {% else %}
+        <p>Debt for: <b>{{ user.username }}</b></p>
+        <p>Sum owed: <b>{{ debt_list.sum|floatformat:2 }}</b></p>
+        <p>Number of purchases: <b>{{ debt_list.debts|length }}</b></p>
         <form method="post">
-            <input type="hidden" id="formtype" name="formtype" value="pay_debt">
+            <input type="hidden" id="formtype" name="formtype" value="pay_all_debts">
             {% csrf_token %}
-            <input type="hidden" id="debt_id" name="debt_id" value="{{ debt.id }}">
+            <input type="hidden" id="locator_id" name="locator_id" value="{{ user.id }}">
             <input class="button" type="submit" value="Pay">
         </form>
-        {% endif %}
       </div>
     {% endfor %}
   </div>
