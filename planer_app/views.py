@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpRequest, JsonResponse, QueryDict
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Count, Sum, Q, Aggregate, Value, Case, When, CharField, F, OuterRef, Subquery
 
 from .models import Task, User, TasksInWeek, Week, Purchase, Debt
 import json
@@ -242,7 +243,25 @@ def users_manage(request):
     return render(request, "users_manage.html", context)
 
 
+class WeekWithUsers:
+    def __init__(self, week, users):
+        self.week = week
+        self.users = users
+
 @staff_member_required(login_url="login")
 def reports(request):
-    context = {}
+
+    weeksWithUsers = []
+
+    weeks = Week.objects.annotate(
+        total_tasks=Count('tasksinweek'),
+        completed_tasks=Count('tasksinweek', filter=Q(tasksinweek__is_done=True)),
+    ).order_by('start_date')
+
+    for week in weeks:
+        users = User.objects.filter(tasksinweek__week_id=week.id).distinct()
+        weeksWithUsers.append(WeekWithUsers(week, users))
+
+
+    context = {"weeks": weeksWithUsers}
     return render(request, "reports.html", context)

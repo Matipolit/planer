@@ -32,6 +32,13 @@ body {
     width: 100%;
 }
 
+th, td{
+    border: solid;
+    border-width: 1px;
+    border-color: var(--border);
+    padding: 4px;
+}
+
 #main {
   height: 100%;
   display: flex;

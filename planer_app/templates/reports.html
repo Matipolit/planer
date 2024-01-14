@@ -3,5 +3,39 @@
 {% block title %}📃 Reports{% endblock %}
 
 {% block content %}
+<div class="cardCollection">
+    <div id="taskReport" class="card">
+        <table id="taskReportTable">
+            <caption>Weeks</caption>
+            <tr>
+                <th>Week dates</th>
+                <th>Completed / all tasks</th>
+                <th>Locators assigned to week</th>
+            </tr>
+            {% for week in weeks %}
+            <tr>
+                <td>{{ week.week.start_date|date:"SHORT_DATE_FORMAT"}} - {{ week.week.end_date|date:"SHORT_DATE_FORMAT" }}</td>
+                <td>{{ week.week.completed_tasks}} / <b>{{ week.week.total_tasks }}</b></td>
+                <td>
+                    {% for locator in week.users %}
+                        {{ locator.first_name }} {{ locator.last_name }}<br>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+       <button onclick="printElementById('taskReportTable')">Print</button>
+    </div>
+</div>
 
+    <script>
+        function printElementById(id) {
+            var printContents = document.getElementById(id);
+            newWindow = window.open("");
+            newWindow.document.write(printContents.outerHTML);
+            newWindow.document.write("<style>table, th, td {border: 1px solid black;} th, td {padding:4px;}</style>");
+            newWindow.print()
+            newWindow.close()
+        }
+    </script>
 {% endblock %}
