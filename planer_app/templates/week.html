@@ -8,6 +8,7 @@
         </div>
         <form method="post">
             {% csrf_token %}
+            <input type="hidden" value="add" name="formtype" />
             <label for="task">Task</label>
             <select id="task_select" name="task">
                 {% for task in tasksNotInWeek %}
@@ -23,6 +24,31 @@
             <input class="button" type="submit" value="Add">
         </form>
     </div>
+
+    <div id="editTaskInWeek" class="card popupWindow">
+        <div class="windowHeader">
+            <h2>Edit task</h2>
+            <button onclick="closeWindow('editTaskInWeek')">X</button>
+        </div>
+        <form id="editForm" method="post">
+            {% csrf_token %}
+            <input type="hidden" value="edit" name="formtype" />
+            <label for="task">Task</label>
+            <label for="edit_task_select"></label>
+            <select id="edit_task_select" name="task">
+                {% for task in tasksNotInWeek %}
+                    <option id="task_option_{{ task.id }}" value="{{ task.id }}">{{ task.name }}</option>
+                {% endfor %}
+            </select><br>
+            <label for="locator">Locator</label>
+            <select id="locator" name="locator">
+                {% for locator in locators %}
+                    <option value="{{ locator.id }}">{{ locator.first_name}}</option>
+                {% endfor %}
+            </select><br>
+            <input class="button" type="submit" value="submit">
+        </form>
+    </div>
 {% endblock popupwindows %}
 
 {% block content %}
@@ -34,6 +60,24 @@
         newTaskOption.value = taskId;
         newTaskOption.innerHTML = taskName;
         document.getElementById("task_select").appendChild(newTaskOption);
+        document.getElementById("edit_task_select").appendChild(newTaskOption.cloneNode());
+    }
+    function editTask(taskInWeekid, taskId, name) {
+        const taskIdElement = document.createElement('input');
+        taskIdElement.type = 'hidden';
+        taskIdElement.name = 'taskId';
+        taskIdElement.value = taskInWeekid;
+        document.getElementById('editForm').appendChild(taskIdElement);
+
+        if(document.getElementById('task_option_' + taskId) != null) {
+            document.getElementById('task_option_' + taskId).remove();
+        }
+        const newTaskOption = document.createElement('option');
+        newTaskOption.id = 'task_option_' + taskId.toString()
+        newTaskOption.value = taskId;
+        newTaskOption.innerHTML = name;
+        document.getElementById("edit_task_select").appendChild(newTaskOption);
+        showWindow('editTaskInWeek');
     }
 </script>
   <a class="button" href="{% url 'tasks_manage' %}" style="margin: 4px;"> Go back</a>
@@ -53,6 +97,7 @@
         <p>Locator: <b>{{ task.locator_id.username }}</b></p>
         <p>Is done: <b>{{ task.is_done }}</b></p>
         <button onClick="deleteTask( {{ task.id }},{{ task.task_id.id }}, '{{ task.task_id.name }}' )">Delete</button>
+          <button onClick="editTask( {{ task.task_id.id }}, '{{ task.task_id.name }}' )">Edit</button>
       </div>
     {% endfor %}
   </div>

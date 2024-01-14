@@ -26,6 +26,7 @@
         </div>
 {% endblock popupwindows %}
 
+{% block title %}🧑‍🤝‍🧑 Manage users{% endblock title %}
 {% block content %}
 
 
@@ -49,19 +50,9 @@
       location.reload();
     }
   </script>
-  <style>
 
-  #manage {
-    display: flex;
-    gap: 8px;
-    align-content: start;
-    align-items: start;
-  }
 
-  </style>
-
-  <h1>🧑‍🤝‍🧑 Manage users</h1>
-  <div id="manage">
+  <div class="cardCollection">
     <div class="card verticalList">
     <div class="verticalListHeader">
         <h2>List of users</h2>

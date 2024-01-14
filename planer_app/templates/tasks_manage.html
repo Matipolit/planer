@@ -39,6 +39,7 @@
 
 {% endblock popupwindows %}
 
+{% block title %}✏️  Manage tasks{% endblock title %}
 
 {% block content %}
 
@@ -54,20 +55,8 @@
 
 </script>
 
-<style>
 
-  #manage {
-    display: flex;
-    gap: 8px;
-    align-content: start;
-    align-items: start;
-  }
-
-</style>
-
-<h1>✏️  Manage tasks</h1>
-
-<div id="manage">
+<div class="cardCollection">
   <div class="card verticalList">
     <div class="verticalListHeader">
       <h2>Tasks</h2>

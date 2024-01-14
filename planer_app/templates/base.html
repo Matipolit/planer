@@ -8,37 +8,73 @@
         <title>Planer</title>
     </head>
     <body>
+
+    <div id="topBar">
         {% if user.is_authenticated %}
-        {% with request.resolver_match.view_name as view_name %}
-        <div class="navbar verticalList">
+            <button onclick="toggleSidebarVisibility()">Menu</button>
+            <h2>{% block title %}{% endblock title %}</h2>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <p>{{user.username}}</p>
                 <a class="button" href="/planer/logout" >Log out</a>
-                <h1>Welcome {{user.first_name}}</h1>
-                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">☑️  Tasks</a>
-                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">💰 Expenses</a>
-                {% if user.is_superuser %}
-                <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/planer/tasks_manage/">✏️ Manage tasks</a>
-                <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/planer/users_manage/">🧑‍🤝‍🧑 Manage users</a>
+            </div>
+        {% endif %}
+    </div>
+
+        <div id="main">
+            {% with request.resolver_match.view_name as view_name %}
+                <div id="sideBar" style="display: flex; position: initial;">
+                    <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">☑️  Tasks</a>
+                    <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">💰 Expenses</a>
+                    {% if user.is_superuser %}
+                        <br>
+                        <b>Admin zone:</b>
+                        <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/planer/tasks_manage/">✏️ Manage tasks</a>
+                        <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/planer/users_manage/">🧑‍🤝‍🧑 Manage users</a>
+                        <a class="{% if view_name == "reports" %}selected {% endif %}nav" href="/planer/reports/">📃 Reports</a>
+                    {% endif %}
+                </div>
+            {% endwith %}
+            <div class="content">
+                {% if errors != null and errors|length != 0 %}
+                    <div class="card errors">
+                        <h2>Errors encountered</h2>
+                        {% for error in errors %}
+                            <p class="item error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
                 {% endif %}
-        </div>
-        {% endwith %}
-        {% endif %}
-        <div class="content">
-        {% if errors != null and errors|length != 0 %}
-            <div class="card errors">
-                <h2>Errors encountered</h2>
-                {% for error in errors %}
-                    <p class="item error">{{ error }}</p>
-                {% endfor %}
+                <div id="windowBackground" class="windowBackground">
+                    {% block popupwindows %}{% endblock popupwindows %}
+                </div>
+                {% block content %}{% endblock content %}
             </div>
-        {% endif %}
-            <div id="windowBackground" class="windowBackground">
-                {% block popupwindows %}{% endblock popupwindows %}
-            </div>
-            {% block content %}{% endblock content %}
         </div>
     </body>
 </html>
+
 <script>
+    window.addEventListener("load" , () => {
+        const sidebar = document.getElementById("sideBar");
+        if (window.innerWidth < 500) {
+            sidebar.style.display = "none";
+            sidebar.style.position = "absolute"
+        } else {
+            sidebar.style.display = "flex";
+            sidebar.style.position = "initial"
+        }
+        }
+    )
+    window.addEventListener("resize" , () => {
+        const sidebar = document.getElementById("sideBar");
+        if (window.innerWidth < 500) {
+            sidebar.style.display = "none";
+            sidebar.style.position = "absolute"
+        } else {
+            sidebar.style.display = "flex";
+            sidebar.style.position = "initial"
+        }
+        }
+    )
     function showWindow(windowId) {
         document.getElementById("windowBackground").style.display = "block";
         document.getElementById(windowId).style.display = "block";
@@ -46,6 +82,15 @@
     function closeWindow(windowId) {
         document.getElementById("windowBackground").style.display = "none";
         document.getElementById(windowId).style.display = "none";
+    }
+
+    function toggleSidebarVisibility() {
+        const sidebar = document.getElementById("sideBar");
+        if (sidebar.style.display === "none" || sidebar.style.display === "") {
+            sidebar.style.display = "flex";
+        } else {
+            sidebar.style.display = "none";
+        }
     }
 
     async function deleteItem(id, table) {

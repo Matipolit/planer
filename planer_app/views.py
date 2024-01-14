@@ -68,6 +68,7 @@ def index(request: HttpRequest):
 
     return render(request, "index.html", context)
 
+
 def get_my_debts_by_person(all_debts, user):
     my_debts = all_debts.filter(locator_id=user, is_paid=False)
     my_debts_by_person = dict()
@@ -77,6 +78,7 @@ def get_my_debts_by_person(all_debts, user):
         my_debts_by_person[debt.purchase_id.locator_id]["sum"] += debt.owed_by_locator(all_debts)
         my_debts_by_person[debt.purchase_id.locator_id]["debts"].append(debt)
     return my_debts_by_person
+
 
 @login_required(login_url='login')
 def expenses(request: HttpRequest):
@@ -190,10 +192,23 @@ def week_details(request, date):
             return JsonResponse({"deleted": "true"})
     elif request.method == "POST":
         vars = request.POST
-        week = Week.objects.get(start_date=date)
-        task = Task.objects.get(id=vars["task"])
-        locator = User.objects.get(id=vars["locator"])
-        TasksInWeek.objects.create(week_id=week, task_id=task, locator_id=locator, is_done=False)
+        type = vars["formtype"]
+        if type == "add":
+            week = Week.objects.get(start_date=date)
+            task = Task.objects.get(id=vars["task"])
+            locator = User.objects.get(id=vars["locator"])
+            TasksInWeek.objects.create(week_id=week, task_id=task, locator_id=locator, is_done=False)
+        elif type == "edit":
+            id = vars["taskId"]
+            instance = TasksInWeek.objects.get(id=id)
+            if instance is None:
+                errors.append("Could not edit - no suchtask in week")
+            else:
+                task = Task.objects.get(id=vars["task"])
+                locator = User.objects.get(id=vars["locator"])
+                instance.task_id = task
+                instance.locator_id = locator
+                instance.save()
 
     week = Week.objects.get(start_date=date)
     tasks = TasksInWeek.objects.filter(week_id=week.id)
@@ -225,3 +240,9 @@ def users_manage(request):
     users = User.objects.all()
     context = {"users": users}
     return render(request, "users_manage.html", context)
+
+
+@staff_member_required(login_url="login")
+def reports(request):
+    context = {}
+    return render(request, "reports.html", context)

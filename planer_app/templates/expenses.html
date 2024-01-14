@@ -45,17 +45,9 @@
     </div>
 {% endblock popupwindows %}
 
-{% block content %}
-<h1>💰 Your expenses</h1>
+{% block title %}💰 Expenses{% endblock title %}
 
-<style>
-  #expenses {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    align-content: flex-start;
-  }
-</style>
+{% block content %}
 
 <script>
 
@@ -66,9 +58,8 @@ function payPurchase(id){
 
 </script>
 
-<h1>Expenses</h1>
 
-<div id="expenses" style="display: flex">
+<div class="cardCollection" style="display: flex">
   <div class="card verticalList">
       <div class="verticalListHeader">
         <h2>Shopping list</h2>

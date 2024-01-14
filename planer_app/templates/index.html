@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
+{% block title %}☑️ Your tasks{% endblock title %}
+
 {% block content %}
 
 <body>
 
-  <h1>Your tasks</h1>
   <div class="tasksWrapper">
     <div id="tasks" class="tasks">
       {% for user in users %}
