@@ -7,25 +7,46 @@
   <h1>Your tasks</h1>
   <div class="tasksWrapper">
     <div id="tasks" class="tasks">
-      {% for user in users %}
+      {% for user in taskUsers %}
         <div class="tasksContentWrapper">
           <div class="tasksContent">
-            <h3>{{user}}</h3>
+            <form name="{{user.id}}" method="post">
+              {% csrf_token %}
+              <input type="hidden" id="formtype" name="formtype" value="user">
+              <select class="userSelect" name="{{user.id}}">
+                {% for u in users %}
+                  {% if u.id == user.id %}
+                    <option class="userOption" value="{{u.id}}" selected>{{u.username}}</option>
+                  {% else %}
+                    <option class="userOption" value="{{u.id}}">{{u.username}}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </form>
             <ul>
               {% for task in tasks %}
-              {% if user == task.locator_id.username %}
-              <li class="listItem">
+              {% if user.username == task.locator_id.username %}
+              {% if task.is_done %}
+              <li class="listItem listItemChecked">
                   <label>{{task.task_id.name}}</label>
                   <form id="{{task.task_id.id}}" name="{{task.task_id.id}}" method="post">
+                    <input type="hidden" id="formtype" name="formtype" value="done">
                     {% csrf_token %}
                     <input type="hidden" name={{task.task_id.id}} value = "0">
-                    {% if task.is_done %}
-                      <input type="checkbox" name="{{task.task_id.id}}" checked>
-                    {% else %}
-                      <input type="checkbox" name="{{task.task_id.id}}">
-                    {% endif %}
+                    <input type="checkbox" name="{{task.task_id.id}}" checked>
                   </form>
               </li>
+              {% else %}
+              <li class="listItem listItemUnchecked">
+                <label>{{task.task_id.name}}</label>
+                <form id="{{task.task_id.id}}" name="{{task.task_id.id}}" method="post">
+                  <input type="hidden" id="formtype" name="formtype" value="done">
+                  {% csrf_token %}
+                  <input type="hidden" name={{task.task_id.id}} value = "0">
+                  <input type="checkbox" name="{{task.task_id.id}}">
+                </form>
+              </li>
+              {% endif %}
               {% endif %}
               {% endfor %}
             </ul>
@@ -40,13 +61,22 @@
     document.addEventListener('DOMContentLoaded', function() {
 
       var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      var selects = document.querySelectorAll('select');
 
       console.log(checkboxes);
+      console.log(selects);
 
       for (checkbox of checkboxes) {
         checkbox.addEventListener('change', function() {
           this.closest('form').submit();
       });
+      }
+
+      for (select of selects) {
+        select.addEventListener('change', function() {
+          this.closest('form').submit();
+          console.log(this.value);
+        });
       }
     });
 

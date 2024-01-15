@@ -27,48 +27,71 @@ def index(request: HttpRequest):
     monday_date = today_date - timedelta(days = today_date.weekday())
 
     week = None
+    tasks = None
+    users = None
 
     try:
-        week = Week.objects.get(start_date = monday_date + timedelta(weeks=1))
+        week = Week.objects.get(start_date = monday_date)
         tasks = TasksInWeek.objects.all().filter(week_id = week)
-    except Exception:
+        users = User.objects.all()
+    except Exception as e:
+        print(e)
         pass
 
     if week == None or tasks == None:
         return render(request, "index.html")
     
     if request.method == "POST" :
-        for task_id, is_done in request.POST.items():
-            if task_id == "csrfmiddlewaretoken":
-                continue
-            task = Task.objects.all().filter(id = task_id)
-            if task:
-                instance = tasks.get(task_id = task[0])
-                if is_done == "on":
-                    instance.is_done = True
-                else:
-                    instance.is_done = False
-                instance.save()
+        vars = request.POST
+        type = vars["formtype"]
+
+        if type == "done":
+            for task_id, is_done in vars.items():
+                if task_id == "csrfmiddlewaretoken" or task_id == "formtype":
+                    continue
+                task = Task.objects.all().filter(id = task_id)
+                if task:
+                    instance = tasks.get(task_id = task[0])
+                    if is_done == "on":
+                        instance.is_done = True
+                    else:
+                        instance.is_done = False
+                    instance.save()
+        elif type == "user":
+            for old_user, new_user in vars.items():
+                if old_user == "csrfmiddlewaretoken" or old_user == "formtype":
+                    continue
+                newUserTasks = tasks.filter(locator_id = users.get(id = old_user)).all()
+                for newUserTask in newUserTasks:
+                    newUserTask.locator_id = users.get(id = new_user)
+                    newUserTask.save()
 
     tasks = None
+    taskUsers = None
 
     try:
         tasks = TasksInWeek.objects.all().filter(week_id = week)
+        taskUsers = tasks.values_list("locator_id", flat=True).distinct()
+        taskUsers = users.filter(id__in = taskUsers)
     except Exception:
         pass
 
-    if tasks == None:
+    if tasks == None or taskUsers == None:
             return render(request, "index.html")
 
-    users = []
+    # taskUsers = []
 
-    for task in list(tasks):
-        users.append(str(task.locator_id.username))
+    # for task in list(tasks):
+    #     taskUsers.append(str(task.locator_id.username))
 
-    users = set(users)
-    users = list(users)
+    # taskUsers = set(taskUsers)
+    # taskUsers = list(taskUsers)
 
-    context = {"tasks": tasks, "users": users}
+    # print(taskUsers, list(tasks))
+
+    print(taskUsers)
+
+    context = {"tasks": tasks, "users": users, "taskUsers": taskUsers}
 
     return render(request, "index.html", context)
 
