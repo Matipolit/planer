@@ -1,9 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block popupwindows %}
 
     <div id="addTaskWindow" class="popupWindow card">
         <div class="windowHeader">
+            <img class="icon-dark" src="{% static 'icons/tasks-light.png' %}" />
+            <img class="icon-light" src="{% static 'icons/tasks-dark.png' %}" />
             <h2>Add new task</h2>
             <button onclick="closeWindow('addTaskWindow')">Close</button>
         </div>
@@ -19,22 +22,7 @@
     </div>
 
     <div id="generateWeeksWindow" class="popupWindow card">
-        <div class="windowHeader">
-            <h2>Generate weeks</h2>
-            <button onclick="closeWindow('generateWeeksWindow')">X</button>
-        </div>
-        <form  method="post">
-            {% csrf_token %}
-            <input type="hidden" id="formtype" name="formtype" value="generate">
-            <label for="beg_date">From date:</label><br>
-            <input id="beg_date" type="date" name="beg_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br>
-            <label for="end_date">To date:</label><br>
-            <input id="end_date" type="date" name="end_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" /><br><br>
-            <input id="include_admin" type="checkbox" name="include_admin">
-            <label for="include_admin">Include admin in tasks</label><br><br>
 
-            <input class="button" type="submit" value="submit">
-        </form>
     </div>
 
 {% endblock popupwindows %}
@@ -59,6 +47,8 @@
 <div class="cardCollection">
   <div class="card verticalList">
     <div class="verticalListHeader">
+    <img class="icon-dark" src="{% static 'icons/tasks-light.png' %}" />
+    <img class="icon-light" src="{% static 'icons/tasks-dark.png' %}" />
       <h2>Tasks</h2>
       <button onclick="showWindow('addTaskWindow')">+</button>
     </div>
@@ -74,8 +64,11 @@
 
   <div class="card verticalList">
       <div class="verticalListHeader">
+          <img class="icon-dark" src="{% static 'icons/calendar-light.png' %}" />
+          <img class="icon-light" src="{% static 'icons/calendar-dark.png' %}" />
           <h2>Generated weeks</h2>
-          <button onclick="showWindow('generateWeeksWindow')">+</button>
+{#          <button onclick="showWindow('generateWeeksWindow')">+</button>#}
+          <button hx-get="show_generate_weeks" hx-trigger="click" hx-target="#generateWeeksWindow" hx-swap="innerHTML" hx-on::before-request="showWindow('generateWeeksWindow')">+</button>
       </div>
     {% for week in weeks%}
       <div id="week_{{ week.id }}" class="item">

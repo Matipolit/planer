@@ -36,13 +36,7 @@ class Debt(models.Model):
     # basic user for now
     locator_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     is_paid = models.BooleanField(default=False, null=False, blank=False)
-
-    def owed_by_locator(self, all_debts):
-        all_debts = all_debts.filter(purchase_id=self.purchase_id)
-        sum = all_debts.aggregate(models.Sum('purchase_id__price'))
-        return sum["purchase_id__price__sum"]/all_debts.count()
-
-
+    owed_amount = models.DecimalField(max_digits=18, decimal_places=2, null=False, blank=False)
 
 
 class TasksInWeek(models.Model):

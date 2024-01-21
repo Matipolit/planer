@@ -1,53 +1,12 @@
 {% extends "base.html" %}
 
 {% block popupwindows %}
-    <div id="addTaskInWeek" class="card popupWindow">
-        <div class="windowHeader">
-            <h2>Add task to week</h2>
-            <button onclick="closeWindow('addTaskInWeek')">X</button>
-        </div>
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" value="add" name="formtype" />
-            <label for="task">Task</label>
-            <select id="task_select" name="task">
-                {% for task in tasksNotInWeek %}
-                    <option id="task_option_{{ task.id }}" value="{{ task.id }}">{{ task.name }}</option>
-                {% endfor %}
-            </select>
-            <label for="locator">Locator</label>
-            <select id="locator" name="locator">
-                {% for locator in locators %}
-                    <option value="{{ locator.id }}">{{ locator.first_name}}</option>
-                {% endfor %}
-            </select>
-            <input class="button" type="submit" value="Add">
-        </form>
+    <div id="addTask" class="card popupWindow">
+
     </div>
 
-    <div id="editTaskInWeek" class="card popupWindow">
-        <div class="windowHeader">
-            <h2>Edit task</h2>
-            <button onclick="closeWindow('editTaskInWeek')">X</button>
-        </div>
-        <form id="editForm" method="post">
-            {% csrf_token %}
-            <input type="hidden" value="edit" name="formtype" />
-            <label for="task">Task</label>
-            <label for="edit_task_select"></label>
-            <select id="edit_task_select" name="task">
-                {% for task in tasksNotInWeek %}
-                    <option id="task_option_{{ task.id }}" value="{{ task.id }}">{{ task.name }}</option>
-                {% endfor %}
-            </select><br>
-            <label for="locator">Locator</label>
-            <select id="locator" name="locator">
-                {% for locator in locators %}
-                    <option value="{{ locator.id }}">{{ locator.first_name}}</option>
-                {% endfor %}
-            </select><br>
-            <input class="button" type="submit" value="submit">
-        </form>
+    <div id="editTask" class="card popupWindow">
+
     </div>
 {% endblock popupwindows %}
 
@@ -62,25 +21,8 @@
         document.getElementById("task_select").appendChild(newTaskOption);
         document.getElementById("edit_task_select").appendChild(newTaskOption.cloneNode());
     }
-    function editTask(taskInWeekid, taskId, name) {
-        const taskIdElement = document.createElement('input');
-        taskIdElement.type = 'hidden';
-        taskIdElement.name = 'taskId';
-        taskIdElement.value = taskInWeekid;
-        document.getElementById('editForm').appendChild(taskIdElement);
-
-        if(document.getElementById('task_option_' + taskId) != null) {
-            document.getElementById('task_option_' + taskId).remove();
-        }
-        const newTaskOption = document.createElement('option');
-        newTaskOption.id = 'task_option_' + taskId.toString()
-        newTaskOption.value = taskId;
-        newTaskOption.innerHTML = name;
-        document.getElementById("edit_task_select").appendChild(newTaskOption);
-        showWindow('editTaskInWeek');
-    }
 </script>
-  <a class="button" href="{% url 'tasks_manage' %}" style="margin: 4px;"> Go back</a>
+<a class="button" href="{% url 'tasks_manage' %}" style="margin: 4px;"> Go back</a>
 <h1>Week {{ week.start_date }} - {{ week.end_date }}</h1>
 
 <div>
@@ -88,16 +30,17 @@
   <div class="card verticalList">
       <div class="verticalListHeader">
           <h2>List of tasks</h2>
-          <button onclick="showWindow('addTaskInWeek')">+</button>
+          <button hx-get="show_add_task/{{ week.id }}" hx-trigger="click" hx-target="#addTask" hx-swap="innerHTML" hx-on::before-request="showWindow('addTask')">Add task</button>
       </div>
     {% for task in tasks %}
       <div id="taskInWeek_{{ task.id }}" class="task item">
         <p>Name: <b>{{ task.task_id.name }}</b></p>
         <p>Every <b>{{ task.task_id.frequency }}</b> weeks</p>
-        <p>Locator: <b>{{ task.locator_id.username }}</b></p>
+        <p>Locator: <b>{{ task.locator_id.first_name}} {{ task.locator_id.last_name }}</b></p>
         <p>Is done: <b>{{ task.is_done }}</b></p>
-        <button onClick="deleteTask( {{ task.id }},{{ task.task_id.id }}, '{{ task.task_id.name }}' )">Delete</button>
-          <button onClick="editTask( {{ task.task_id.id }}, '{{ task.task_id.name }}' )">Edit</button>
+        <button hx-delete="" hx-target="#taskInWeek_{{ task.id }}" hx-swap="delete" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                hx-vals='{"id": "{{ task.id }}"}' hx-confirm="Delete task {{ task.task_id.name }}?">Delete</button>
+        <button hx-get="show_edit_task/{{ task.id }}/{{ week.id }}" hx-trigger="click" hx-target="#editTask" hx-swap="innerHTML" hx-on::before-request="showWindow('editTask')">Edit</button>
       </div>
     {% endfor %}
   </div>

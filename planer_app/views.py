@@ -1,7 +1,6 @@
 from typing import Any, Type
 
 from django.shortcuts import render
-from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpRequest, JsonResponse, QueryDict
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -10,6 +9,7 @@ from django.db.models import Count, Sum, Q, Aggregate, Value, Case, When, CharFi
 from .models import Task, User, TasksInWeek, Week, Purchase, Debt
 import json
 from datetime import date, timedelta, datetime
+from planer_app.tasks import sendEmail
 
 
 # for iterating over time by week
@@ -76,7 +76,7 @@ def get_my_debts_by_person(all_debts, user):
     for debt in my_debts:
         if debt.purchase_id.locator_id not in my_debts_by_person:
             my_debts_by_person[debt.purchase_id.locator_id] = {"sum": 0, "debts": []}
-        my_debts_by_person[debt.purchase_id.locator_id]["sum"] += debt.owed_by_locator(all_debts)
+        my_debts_by_person[debt.purchase_id.locator_id]["sum"] += debt.owed_amount
         my_debts_by_person[debt.purchase_id.locator_id]["debts"].append(debt)
     return my_debts_by_person
 
@@ -87,24 +87,36 @@ def expenses(request: HttpRequest):
 
     if (request.method == "POST"):
         vars = request.POST
-        type = vars["formtype"]
-        if (type == "to_purchase"):
+        formType = vars["formtype"]
+        if (formType == "to_purchase"):
             Purchase.objects.create(name=vars["name"], price=vars["price"], amount=vars["amount"])
-        elif (type == "purchased"):
+        elif (formType == "purchased"):
             purchase = Purchase.objects.get(id=vars["purchase_id"])
-            indebted: Type[QueryDict[int]] = vars["indebted"]
+            indebted = vars.getlist(key="indebted")
 
             purchase.locator_id = request.user
             purchase.save()
+            owed_amount = purchase.sum_price / len(indebted)
 
-            for id in indebted:
-                Debt.objects.create(purchase_id=purchase, locator_id=User.objects.get(id=id), is_paid=False)
-        elif (type == "pay_all_debts"):
-            debts_to_pay = my_debts_by_person[User.objects.get(id=vars["locator_id"])]["debts"]
+            for locator_id in indebted:
+                if int(locator_id) == request.user.id:
+                    continue
+                locator = User.objects.get(id=locator_id)
+
+                print("indebted: " + locator_id)
+                Debt.objects.create(purchase_id=purchase, locator_id=locator, is_paid=False, owed_amount=owed_amount)
+                email = locator.email
+                sendEmail.delay(email, f"Hi {locator.first_name},\nYou have a new debt of {owed_amount}\nfor the purchase of {purchase.name}.\nPlease pay it back to {request.user.first_name} {request.user.last_name}.\nThanks,\nPlaner App", f"Planer: New debt to {request.user.first_name} {request.user.last_name} ")
+
+        elif (formType == "pay_all_debts"):
+            paid_user = User.objects.get(id=vars["locator_id"])
+            debts_to_pay = my_debts_by_person[paid_user]["debts"]
             for debt in debts_to_pay:
                 debt.is_paid = True
                 debt.save()
 
+            email = paid_user.email
+            sendEmail.delay(email, f"Hi {paid_user.first_name},\n{request.user.first_name} {request.user.last_name} has paid you back for all their debts - {my_debts_by_person[paid_user]['sum']}.\nThanks,\nPlaner App", f"Planer: All debts paid from {request.user.first_name} {request.user.last_name}")
             my_debts_by_person = get_my_debts_by_person(Debt.objects.all(), request.user)
 
     to_purchase = Purchase.objects.filter(locator_id=None)
@@ -119,48 +131,70 @@ def expenses(request: HttpRequest):
 def tasks_manage(request):
     errors = []
     if (request.method == "POST"):
-        vars = request.POST
-        type = vars["formtype"]
+        requestVars = request.POST
+        formType = requestVars["formtype"]
 
-        if (type == "task"):
-            Task.objects.create(name=vars["name"], frequency=vars["frequency"])
-        elif (type == "generate"):
+        if formType == "task":
+            Task.objects.create(name=requestVars["name"], frequency=requestVars["frequency"])
 
+        elif formType == "generate":
             tasks = Task.objects.all()
-            if vars["beg_date"] == "" or vars["end_date"] == "":
+            if requestVars["beg_date"] == "" or requestVars["end_date"] == "":
                 errors.append("Dates not selected. Please fill in all the fields")
             else:
-                begDate = datetime.strptime(vars["beg_date"], "%Y-%m-%d")
-                endDate = datetime.strptime(vars["end_date"], "%Y-%m-%d")
+                begDate = datetime.strptime(requestVars["beg_date"], "%Y-%m-%d")
+                endDate = datetime.strptime(requestVars["end_date"], "%Y-%m-%d")
 
-                includeAdminInTasks = "include_admin" in vars.keys()
-                if (includeAdminInTasks):
-                    locators = User.objects.all()
+                includeAdminInTasks = "include_admin" in requestVars.keys()
+                if includeAdminInTasks:
+                    locators = User.objects.all().order_by("first_name")
                 else:
                     locators = User.objects.all().exclude(is_superuser=True)
                 locatorsNum = len(locators)
+                previousWeeks = Week.objects.all().filter(start_date__lte=begDate).order_by("-start_date")
+                tasksWithTimesToGenerate = dict()
+                for task in tasks:
+                    tasksWithTimesToGenerate[task] = 1
+
+                locatorIdx = 0
+                if len(previousWeeks) > 0:
+                    for idx, week in enumerate(previousWeeks):
+                        tasksInWeek = TasksInWeek.objects.all().filter(week_id=week.id)
+                        if idx == 0 and len(tasksInWeek) > 0:
+                            locatorIdx = list(locators).index(tasksInWeek[0].locator_id)
+                        for taskInWeek in tasksInWeek:
+                            if taskInWeek.task_id.frequency != tasksWithTimesToGenerate[taskInWeek.task_id]:
+                                if taskInWeek.task_id.frequency - idx > 1:
+                                    tasksWithTimesToGenerate[taskInWeek.task_id] = taskInWeek.task_id.frequency - idx
+                    print(f"Previous weeks found: {previousWeeks}")
+
                 for (weekBegDate, idx) in dateSpan(begDate, endDate):
+                    locatorIdx += 1
                     weekEndDate: datetime.date = weekBegDate + timedelta(days=6)
                     print(f"Generating week {weekBegDate} - {weekEndDate}")
                     week = Week.objects.create(start_date=weekBegDate, end_date=weekEndDate)
                     print("week generated")
-                    for task in tasks:
+                    for task in tasksWithTimesToGenerate.keys():
                         print(f"Checking to add task {task} with freq {task.frequency} and idx of week {idx}")
-                        if (idx % task.frequency == 0):
+                        if tasksWithTimesToGenerate[task] == 1:
                             print(f"Task elegible to add")
-                            taskInWeek = TasksInWeek.objects.create(locator_id=locators[idx % locatorsNum],
+                            taskInWeek = TasksInWeek.objects.create(locator_id=locators[locatorIdx % locatorsNum],
                                                                     task_id=task,
                                                                     week_id=week, is_done=False)
                             print(taskInWeek)
+                            tasksWithTimesToGenerate[task] = task.frequency
+                        else:
+                            tasksWithTimesToGenerate[task] -= 1
+                            print(f"Task not elegible to add")
 
-    elif (request.method == "DELETE"):
-        vars = json.loads(request.DELETE)
-        id = vars["id"]
-        type = vars["type"]
-        if (type == "task"):
-            instance = Task.objects.get(id=id)
-        elif (type == "week"):
-            instance = Week.objects.get(id=id)
+    elif request.method == "DELETE":
+        requestVars = json.loads(request.DELETE)
+        idToDelete = requestVars["id"]
+        formType = requestVars["type"]
+        if formType == "task":
+            instance = Task.objects.get(id=idToDelete)
+        elif formType == "week":
+            instance = Week.objects.get(id=idToDelete)
             TasksInWeek.objects.all().filter(week_id=instance.id).delete()
 
         print(f"Deleting instance {instance}")
@@ -182,7 +216,8 @@ def tasks_manage(request):
 def week_details(request, date):
     errors = []
     if request.method == "DELETE":
-        vars = json.loads(request.DELETE)
+        vars = QueryDict(request.DELETE)
+        print(f"Delete vars: {vars}")
         id = vars["id"]
         instance = TasksInWeek.objects.get(id=id)
         if instance is None:
@@ -212,7 +247,7 @@ def week_details(request, date):
                 instance.save()
 
     week = Week.objects.get(start_date=date)
-    tasks = TasksInWeek.objects.filter(week_id=week.id)
+    tasks = TasksInWeek.objects.filter(week_id=week.id).order_by("id")
     taskIdsInWeek = tasks.values_list("task_id")
     tasksNotInWeek = Task.objects.exclude(id__in=taskIdsInWeek)
     context = {"tasks": tasks, "week": week, "tasksNotInWeek": tasksNotInWeek, 'locators': User.objects.all()}
@@ -243,14 +278,8 @@ def users_manage(request):
     return render(request, "users_manage.html", context)
 
 
-class WeekWithUsers:
-    def __init__(self, week, users):
-        self.week = week
-        self.users = users
-
 @staff_member_required(login_url="login")
 def reports(request):
-
     weeksWithUsers = []
 
     weeks = Week.objects.annotate(
@@ -260,8 +289,16 @@ def reports(request):
 
     for week in weeks:
         users = User.objects.filter(tasksinweek__week_id=week.id).distinct()
-        weeksWithUsers.append(WeekWithUsers(week, users))
+        weeksWithUsers.append({"week": week, "users": users})
 
+    unpaidPurchasesWithUsers = []
+    unpaidPurchases = Purchase.objects.filter(debt__is_paid=False).annotate(
+        owedPerPerson=F('debt__purchase_id__price') / Count('debt__purchase_id')
+    )
 
-    context = {"weeks": weeksWithUsers}
+    for purchase in unpaidPurchases:
+        users = User.objects.filter(debt__purchase_id=purchase.id, debt__is_paid=False).distinct()
+        unpaidPurchasesWithUsers.append({"purchase": purchase, "users": users})
+
+    context = {"weeks": weeksWithUsers, "purchases": unpaidPurchasesWithUsers}
     return render(request, "reports.html", context)

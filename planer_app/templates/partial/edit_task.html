@@ -1,0 +1,29 @@
+<div class="windowHeader">
+    <h2>Edit task</h2>
+    <button onclick="closeWindow('editTaskInWeek')">X</button>
+</div>
+
+<p>Name: <b>{{ taskInWeek.task_id.name }}</b></p>
+<p>Frequency: Every <b>{{ taskInWeek.task_id.freqency }} weeks</b></p>
+
+<form id="editForm" method="post">
+    {% csrf_token %}
+    <input type="hidden" value="edit" name="formtype" />
+    <input type="hidden" value="{{ taskInWeek.id }}" name="taskId" />
+    <label for="task">Task</label>
+    <label for="edit_task_select"></label>
+    <select id="edit_task_select" name="task">
+        <option selected="selected" id="task_option_{{ taskInWeek.task_id.id }}" value="{{ taskInWeek.task_id.id }}">{{ taskInWeek.task_id.name }} ({{ taskInWeek.task_id.frequency }})</option>
+        {% for task in tasksNotInWeek%}
+            <option id="task_option_{{ task.id }}" value="{{ task.id }}">{{ task.name }} ({{ task.frequency }})</option>
+        {% endfor %}
+    </select><br>
+    <label for="locator">Locator</label>
+    <select id="locator" name="locator">
+        {% for locator in locators %}
+            <option {% if locator.id == taskInWeek.locator_id.id %}selected="selected"{% endif %}
+                    value="{{ locator.id }}">{{ locator.first_name}} {{ locator.last_name }}</option>
+        {% endfor %}
+    </select><br>
+    <input class="button" type="submit" value="submit">
+</form>

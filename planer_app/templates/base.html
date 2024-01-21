@@ -9,48 +9,52 @@
     </head>
     <body>
 
+    {% if user.is_authenticated %}
     <div id="topBar">
-        {% if user.is_authenticated %}
             <button onclick="toggleSidebarVisibility()">Menu</button>
             <h2>{% block title %}{% endblock title %}</h2>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <p>{{user.username}}</p>
                 <a class="button" href="/planer/logout" >Log out</a>
             </div>
-        {% endif %}
     </div>
+    {% endif %}
 
-        <div id="main">
-            {% with request.resolver_match.view_name as view_name %}
-                <div id="sideBar" style="display: flex; position: initial;">
-                    <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">☑️  Tasks</a>
-                    <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">💰 Expenses</a>
-                    {% if user.is_superuser %}
-                        <br>
-                        <b>Admin zone:</b>
-                        <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/planer/tasks_manage/">✏️ Manage tasks</a>
-                        <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/planer/users_manage/">🧑‍🤝‍🧑 Manage users</a>
-                        <a class="{% if view_name == "reports" %}selected {% endif %}nav" href="/planer/reports/">📃 Reports</a>
-                    {% endif %}
-                </div>
-            {% endwith %}
-            <div class="content">
-                {% if errors != null and errors|length != 0 %}
-                    <div class="card errors">
-                        <h2>Errors encountered</h2>
-                        {% for error in errors %}
-                            <p class="item error">{{ error }}</p>
-                        {% endfor %}
-                    </div>
+    <div id="main">
+        {% if user.is_authenticated %}
+        {% with request.resolver_match.view_name as view_name %}
+            <div id="sideBar" style="display: flex; position: initial;">
+                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">☑️  Tasks</a>
+                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">💰 Expenses</a>
+                {% if user.is_superuser %}
+                    <br>
+                    <b>Admin zone:</b>
+                    <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/planer/tasks_manage/">✏️ Manage tasks</a>
+                    <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/planer/users_manage/">🧑‍🤝‍🧑 Manage users</a>
+                    <a class="{% if view_name == "reports" %}selected {% endif %}nav" href="/planer/reports/">📃 Reports</a>
                 {% endif %}
-                <div id="windowBackground" class="windowBackground">
-                    {% block popupwindows %}{% endblock popupwindows %}
-                </div>
-                {% block content %}{% endblock content %}
             </div>
+        {% endwith %}
+        {% endif %}
+        <div class="content">
+            {% if errors != null and errors|length != 0 %}
+                <div class="card errors">
+                    <h2>Errors encountered</h2>
+                    {% for error in errors %}
+                        <p class="item error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div id="windowBackground" class="windowBackground">
+                {% block popupwindows %}{% endblock popupwindows %}
+            </div>
+            {% block content %}{% endblock content %}
+        </div>
         </div>
     </body>
 </html>
+
+<script src="{% static 'htmx.min.js' %}" defer></script>
 
 <script>
     window.addEventListener("load" , () => {

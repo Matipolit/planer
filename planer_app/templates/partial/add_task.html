@@ -1,0 +1,21 @@
+<div class="windowHeader">
+    <h2>Add task to week</h2>
+    <button onclick="closeWindow('addTaskInWeek')">X</button>
+</div>
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" value="add" name="formtype" />
+    <label for="task">Task</label>
+    <select id="task_select" name="task">
+        {% for task in tasksNotInWeek %}
+            <option id="task_option_{{ task.id }}" value="{{ task.id }}">{{ task.name }} ({{ task.frequency }})</option>
+        {% endfor %}
+    </select><br>
+    <label for="locator">Locator</label>
+    <select id="locator" name="locator">
+        {% for locator in locators %}
+            <option value="{{ locator.id }}">{{ locator.first_name}} {{ locator.last_name }}</option>
+        {% endfor %}
+    </select><br>
+    <input class="button" type="submit" value="Add">
+</form>

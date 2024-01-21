@@ -1,0 +1,20 @@
+{% load static %}
+
+<div class="windowHeader">
+    <img class="icon-dark" src="{% static 'icons/calendar-light.png' %}" />
+    <img class="icon-light" src="{% static 'icons/calendar-dark.png' %}" />
+    <h2>Generate weeks</h2>
+    <button onclick="closeWindow('generateWeeksWindow')">X</button>
+</div>
+<form  method="post">
+    {% csrf_token %}
+    <input type="hidden" id="formtype" name="formtype" value="generate">
+    <label for="beg_date">From date:</label><br>
+    <input id="beg_date" type="date" name="beg_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" value="{{ nextWeekStart }}"/><br>
+    <label for="end_date">To date:</label><br>
+    <input id="end_date" type="date" name="end_date" min="{{ today }}" step="7" placeholder="dd-mm-yyyy" value="{{ nextNextWeekStart }}" /><br><br>
+    <input id="include_admin" type="checkbox" name="include_admin">
+    <label for="include_admin">Include admin in tasks</label><br><br>
+
+    <input class="button" type="submit" value="submit">
+</form>

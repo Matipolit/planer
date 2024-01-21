@@ -4,6 +4,7 @@
 
 {% block content %}
 <div class="cardCollection">
+
     <div id="taskReport" class="card">
         <table id="taskReportTable">
             <caption>Weeks</caption>
@@ -26,12 +27,36 @@
         </table>
        <button onclick="printElementById('taskReportTable')">Print</button>
     </div>
+
+    <div id="expensesReport" class="card">
+        <table id="expensesReportTable">
+            <caption>Unpaid debts</caption>
+            <tr>
+                <th>Product purchased</th>
+                <th>Money owed per locator</th>
+                <th>Locators who have not paid</th>
+            </tr>
+            {% for purchase in purchases %}
+                <tr>
+                    <td>{{ purchase.purchase.name }}</td>
+                    <td>{{ purchase.purchase.owedPerPerson|floatformat:2 }}</td>
+                    <td>
+                        {% for locator in purchase.users %}
+                            {{ locator.first_name }} {{ locator.last_name }}<br>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <button onclick="printElementById('expensesReportTable')">Print</button>
+    </div>
+
 </div>
 
     <script>
         function printElementById(id) {
-            var printContents = document.getElementById(id);
-            newWindow = window.open("");
+            const printContents = document.getElementById(id);
+            let newWindow = window.open("");
             newWindow.document.write(printContents.outerHTML);
             newWindow.document.write("<style>table, th, td {border: 1px solid black;} th, td {padding:4px;}</style>");
             newWindow.print()
