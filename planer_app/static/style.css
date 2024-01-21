@@ -270,6 +270,10 @@ button:hover, .button:hover, .nav:hover {
     height: 24px;
 }
 
+ul{
+    padding: 0;
+}
+
 .icon-dark {
     display: none;
 }

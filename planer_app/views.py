@@ -25,76 +25,75 @@ def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
 # views
 @login_required(login_url='login')
 def index(request: HttpRequest):
-
-    today_date = date.today()
-    monday_date = today_date - timedelta(days = today_date.weekday())
-
-    week = None
-    tasks = None
+    thisWeek = None
+    tasks = []
     users = None
 
+    if request.method == "POST":
+        vars = request.POST
+        type = vars["formtype"]
+
+        if type == "done":
+            print(f"done vars: {vars}")
+            task_id = vars["task_id"]
+            is_done = vars["checked"]
+            task = TasksInWeek.objects.get(id=task_id)
+            if task:
+                if is_done == "on":
+                    print("Marking task as done")
+                    task.is_done = True
+                else:
+                    print("Marking task as not done")
+                    task.is_done = False
+                task.save()
+        elif type == "user":
+            for old_user, new_user in vars.items():
+                if old_user == "csrfmiddlewaretoken" or old_user == "formtype":
+                    continue
+                newUserTasks = tasks.filter(locator_id=users.get(id=old_user)).all()
+                for newUserTask in newUserTasks:
+                    newUserTask.locator_id = users.get(id=new_user)
+                    newUserTask.save()
+
+    today_date = date.today()
+    monday_date = today_date - timedelta(days=today_date.weekday())
+    my_tasks_all = TasksInWeek.objects.all().filter(locator_id=request.user)
+
+    tasks_by_week_before = dict()
+    tasks_by_week_after = dict()
+    for week in Week.objects.all().order_by("-start_date"):
+        tasks_in_week = my_tasks_all.filter(week_id=week.id)
+        if len(tasks_in_week) == 0:
+            continue
+
+        if week.start_date < monday_date:
+            if not tasks_in_week.filter(is_done=False).exists():
+                continue
+            tasks_by_week_before[week] = tasks_in_week
+
+        elif week.start_date > monday_date:
+            tasks_by_week_after[week] = tasks_in_week
+
+        else:
+            tasks = tasks_in_week
+
     try:
-        week = Week.objects.get(start_date = monday_date)
-        tasks = TasksInWeek.objects.all().filter(week_id = week)
+        thisWeek = Week.objects.get(start_date=monday_date)
         users = User.objects.all()
     except Exception as e:
         print(e)
         pass
 
-    if week == None or tasks == None:
+    if thisWeek is None or tasks is None:
         return render(request, "index.html")
-    
-    if request.method == "POST" :
-        vars = request.POST
-        type = vars["formtype"]
 
-        if type == "done":
-            for task_id, is_done in vars.items():
-                if task_id == "csrfmiddlewaretoken" or task_id == "formtype":
-                    continue
-                task = Task.objects.all().filter(id = task_id)
-                if task:
-                    instance = tasks.get(task_id = task[0])
-                    if is_done == "on":
-                        instance.is_done = True
-                    else:
-                        instance.is_done = False
-                    instance.save()
-        elif type == "user":
-            for old_user, new_user in vars.items():
-                if old_user == "csrfmiddlewaretoken" or old_user == "formtype":
-                    continue
-                newUserTasks = tasks.filter(locator_id = users.get(id = old_user)).all()
-                for newUserTask in newUserTasks:
-                    newUserTask.locator_id = users.get(id = new_user)
-                    newUserTask.save()
+    print(f"Before tasks: {tasks_by_week_before}")
 
-    tasks = None
-    taskUsers = None
-
-    try:
-        tasks = TasksInWeek.objects.all().filter(week_id = week)
-        taskUsers = tasks.values_list("locator_id", flat=True).distinct()
-        taskUsers = users.filter(id__in = taskUsers)
-    except Exception:
-        pass
-
-    if tasks == None or taskUsers == None:
-            return render(request, "index.html")
-
-    # taskUsers = []
-
-    # for task in list(tasks):
-    #     taskUsers.append(str(task.locator_id.username))
-
-    # taskUsers = set(taskUsers)
-    # taskUsers = list(taskUsers)
-
-    # print(taskUsers, list(tasks))
-
-    print(taskUsers)
-
-    context = {"tasks": tasks, "users": users, "taskUsers": taskUsers}
+    context = {"tasks": tasks,
+               "tasksByWeekBefore": tasks_by_week_before,
+               "tasksByWeekAfter": tasks_by_week_after,
+               "users": users,
+               "week": thisWeek}
 
     return render(request, "index.html", context)
 
@@ -135,7 +134,9 @@ def expenses(request: HttpRequest):
                 print("indebted: " + locator_id)
                 Debt.objects.create(purchase_id=purchase, locator_id=locator, is_paid=False, owed_amount=owed_amount)
                 email = locator.email
-                sendEmail.delay(email, f"Hi {locator.first_name},\nYou have a new debt of {owed_amount}\nfor the purchase of {purchase.name}.\nPlease pay it back to {request.user.first_name} {request.user.last_name}.\nThanks,\nPlaner App", f"Planer: New debt to {request.user.first_name} {request.user.last_name} ")
+                sendEmail.delay(email,
+                                f"Hi {locator.first_name},\nYou have a new debt of {owed_amount}\nfor the purchase of {purchase.name}.\nPlease pay it back to {request.user.first_name} {request.user.last_name}.\nThanks,\nPlaner App",
+                                f"Planer: New debt to {request.user.first_name} {request.user.last_name} ")
 
         elif (formType == "pay_all_debts"):
             paid_user = User.objects.get(id=vars["locator_id"])
@@ -145,7 +146,9 @@ def expenses(request: HttpRequest):
                 debt.save()
 
             email = paid_user.email
-            sendEmail.delay(email, f"Hi {paid_user.first_name},\n{request.user.first_name} {request.user.last_name} has paid you back for all their debts - {my_debts_by_person[paid_user]['sum']}.\nThanks,\nPlaner App", f"Planer: All debts paid from {request.user.first_name} {request.user.last_name}")
+            sendEmail.delay(email,
+                            f"Hi {paid_user.first_name},\n{request.user.first_name} {request.user.last_name} has paid you back for all their debts - {my_debts_by_person[paid_user]['sum']}.\nThanks,\nPlaner App",
+                            f"Planer: All debts paid from {request.user.first_name} {request.user.last_name}")
             my_debts_by_person = get_my_debts_by_person(Debt.objects.all(), request.user)
 
     to_purchase = Purchase.objects.filter(locator_id=None)
