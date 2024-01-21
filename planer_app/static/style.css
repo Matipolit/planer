@@ -227,6 +227,14 @@ button:hover, .button:hover, .nav:hover {
     margin-right: 10px;
 }
 
+.listItemUnchecked {
+  border-color: #FF7276;
+}
+
+.listItemChecked {
+  border-color: #8ABD91;
+}
+
 .windowBackground {
     position: fixed;
     z-index: 1;
@@ -256,6 +264,7 @@ button:hover, .button:hover, .nav:hover {
     margin-bottom: 16px;
 }
 
+
 .icon-dark, .icon-light {
     width: 24px;
     height: 24px;
@@ -276,3 +285,18 @@ button:hover, .button:hover, .nav:hover {
          display: initial;
     }
 }
+
+.userSelect {
+  margin-top: 15px;
+  background-color: var(--surface);
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  width: 35%;
+  text-align: center;
+}
+
+.userOption {
+  color: white;
+}
+
