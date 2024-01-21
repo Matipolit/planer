@@ -1,33 +1,12 @@
 {% extends "base.html" %}
 
-{% block content %}
-<h1>💰 Your expenses</h1>
-
-<style>
-  #purchases {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    align-content: flex-start;
-  }
-</style>
-
-<script>
-
-function payPurchase(id){
-    document.getElementById("purchase_id").value = id;
-    showWindow("payPurchase");
-}
-
-</script>
-
-<h1>Expenses</h1>
-
-{# Popup windows #}
-<div id="windowBackground" class="windowBackground">
+{% load static %}
+{% block popupwindows %}
 
     <div id="addPurchase" class="popupWindow card">
         <div class="windowHeader">
+            <img class="icon-dark" src="{% static 'icons/shopping-cart-light.png' %}" />
+            <img class="icon-light" src="{% static 'icons/shopping-cart-dark.png' %}" />
             <h2>Add item to shopping list</h2>
             <button onclick="closeWindow('addPurchase')">Close</button>
         </div>
@@ -46,71 +25,64 @@ function payPurchase(id){
         </form>
     </div>
 
-    <div id="payPurchase" class="popupWindow card">
-        <div class="windowHeader">
-            <h2>Pay for item</h2>
-            <button onclick="closeWindow('payPurchase')">Close</button>
-        </div>
+    <div id="payPurchase" class="popupWindow card" ></div>
+{% endblock popupwindows %}
 
-        <form method="post">
-            <input type="hidden" id="formtype" name="formtype" value="purchased">
-            {% csrf_token %}
-            <h2>I purchased:</h2>
-            <label for="purchase_id">Request ID:</label><br>
-            <input type="number" id="purchase_id" name="purchase_id" min="0"><br>
-            <label for="username">Indebted user:</label><br>
-            <input type="text" id="username" name="username"><br>
+{% block title %}💰 Expenses{% endblock title %}
 
-            <input class="button" type="submit" value="submit">
-        </form>
-    </div>
+{% block content %}
 
-</div>
-
-
-<div id="purchases" style="display: flex">
+<div class="cardCollection" style="display: flex">
   <div class="card verticalList">
-    <h2>Shopping list</h2>
-    <button onclick="showWindow('addPurchase')">Add</button>
+      <div class="verticalListHeader">
+          <img class="icon-dark" src="{% static 'icons/shopping-cart-light.png' %}" />
+          <img class="icon-light" src="{% static 'icons/shopping-cart-dark.png' %}" />
+        <h2>Shopping list</h2>
+        <button onclick="showWindow('addPurchase')">+</button>
+      </div>
 
-    {% for purchase in purchases %}
+    {%  if to_purchase|length == 0 %}
+
+        <p>Empty</p>
+
+    {% endif %}
+    {% for purchase in to_purchase %}
       <div class="purchase item">
-        <p>ID: <b>{{ purchase.id }}</b></p>
-        <p>Purchase name: <b>{{ purchase.name }}</b></p>
+        <p>Item: <b>{{ purchase.name }}</b></p>
         <p>Price: <b>{{ purchase.price }}</b></p>
         <p>Amount: <b>{{ purchase.amount }}</b></p>
         {% if purchase.locator_id != None %}
             <p>Buyer: <b>{{ purchase.locator_id }}</b></p>
         {% else %}
-          <button onclick="payPurchase({{ purchase.id }})">Buy</button>
+          <button hx-get="show_pay_purchase/{{ purchase.id }}" hx-trigger="click" hx-target="#payPurchase"
+                  hx-swap="innerHTML" hx-on::before-request="showWindow('payPurchase')">Buy</button>
         {% endif %}
       </div>
     {% endfor %}
   </div>
 
 
-<div class="card verticalList">
-    <h2>Debts:</h2>
-    {% for debt in debts %}
-      <div class="item debts">
-        <p>Debt ID: <b>{{ debt.id }}</b></p>
-        <p>Purchase ID: <b>{{ debt.purchase_id.id }}</b></p>
-        <p>Indebted: <b>{{ debt.locator_id }}</b></p>
-        <p>Buyer: <b>{{ debt.purchase_id.locator_id }}</b></p>
-        <p>Amount: <b>{{ debt.purchase_id.amount }}</b></p>
-        {% if debt.is_paid %}
-            <p><b>Paid</b></p>
-        {% else %}
-        <form method="post">
-            <input type="hidden" id="formtype" name="formtype" value="pay_debt">
-            {% csrf_token %}
-            <input type="hidden" id="debt_id" name="debt_id" value="{{ debt.id }}">
-            <input class="button" type="submit" value="Pay">
-        </form>
+    <div class="card verticalList">
+        <div class="verticalListHeader">
+            <img class="icon-dark" src="{% static 'icons/debt-light.png' %}" />
+            <img class="icon-light" src="{% static 'icons/debt-dark.png' %}" />
+            <h2>Your debts:</h2>
+            <span></span>
+        </div>
+            {% if debts|length == 0 %}
+            <p>Empty</p>
         {% endif %}
-      </div>
-    {% endfor %}
-  </div>
+        {% for user, debt_list in debts.items %}
+          <div class="item debts" id="debtlist_{{ user }}">
+            <p>Debt for: <b>{{ user.first_name}} {{ user.last_name }}</b></p>
+            <p>Sum owed: <b>{{ debt_list.sum|floatformat:2 }}</b></p>
+            <p>Number of purchases: <b>{{ debt_list.debts|length }}</b></p>
+              <button hx-post="" hx-trigger="click" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-vals='{"formtype": "pay_all_debts", "locator_id": "{{ user.id }}"}'
+                      hx-confirm="Are you sure the debt of {{ debt_list.sum|floatformat:2 }} was paid?" hx-swap="delete" hx-target="#debtlist_{{ user }}">Paid</button>
+          </div>
+        {% endfor %}
+    </div>
+
 
 </div>
 

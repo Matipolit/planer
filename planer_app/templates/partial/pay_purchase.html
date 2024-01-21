@@ -1,0 +1,24 @@
+<div class="windowHeader">
+    <h2>Pay for item</h2>
+    <button onclick="closeWindow('payPurchase')">Close</button>
+</div>
+<p>Name: <b>{{ purchase.name }}</b></p>
+<p>Price: <b>{{ purchase.price }}</b></p>
+<p>Amount: <b>{{ purchase.amount }}</b></p>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" id="formtype" name="formtype" value="purchased">
+    <input type="hidden" id="purchase_id" name="purchase_id" value="{{ purchase.id }}"><br>
+
+    <label>Indebted users:</label><br>
+    <input type="checkbox" id="username_{{ user.id }}" name="indebted" value="{{ user.id }}">
+    <label for="username_{{ user.id }}"><b>You</b></label><br>
+
+    {% for user in users %}
+        <input type="checkbox" id="username_{{ user.id }}" name="indebted" value="{{ user.id }}">
+        <label for="username_{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</label><br>
+    {% endfor %}
+
+    <input class="button" type="submit" value="submit">
+</form>

@@ -7,28 +7,37 @@ class Task(models.Model):
     name = models.CharField(max_length=255, null=False, blank=False)
     frequency = models.IntegerField(default=1)
 
+
 def validate_date_range(start_date, end_date):
     if start_date > end_date:
         raise ValidationError("The end date must be greater or equal than the start date.")
 
-class Week(models.Model):
 
-    #no mask for now
+class Week(models.Model):
+    # no mask for now
     start_date = models.DateField(unique=True, null=False, blank=False)
     end_date = models.DateField(unique=True, null=False, blank=False, validators=[validate_date_range])
+
 
 class Purchase(models.Model):
     name = models.CharField(max_length=255, null=False, blank=False)
     price = models.DecimalField(max_digits=18, decimal_places=2, null=False, blank=False)
     amount = models.IntegerField(default=1)
-    #basic user for now
+    # basic user for now
     locator_id = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+
+    @property
+    def sum_price(self):
+        return self.price * self.amount
+
 
 class Debt(models.Model):
     purchase_id = models.ForeignKey(Purchase, on_delete=models.CASCADE, null=False, blank=False)
     # basic user for now
     locator_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     is_paid = models.BooleanField(default=False, null=False, blank=False)
+    owed_amount = models.DecimalField(max_digits=18, decimal_places=2, null=False, blank=False)
+
 
 class TasksInWeek(models.Model):
     task_id = models.ForeignKey(Task, on_delete=models.CASCADE, null=False, blank=False)
