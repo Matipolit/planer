@@ -1,89 +1,62 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}☑️ Your tasks{% endblock title %}
 
 {% block content %}
+    <div class="cardCollection">
+        {% if tasks|length != 0 %}
+            <div>
+                <h2>Current week:</h2>
+                <div class="card verticalList">
+                    <div class="verticalListHeader">
+                        <img class="icon-light" src="{% static 'icons/tasks-dark.png' %}" />
+                        <img class="icon-dark" src="{% static 'icons/tasks-light.png' %}" />
+                        <h2>{{ week.start_date|date:"d M Y" }} - {{ week.end_date|date:"d M Y" }}</h2>
+                    </div>
+                    <ul>
+                        {% for task in tasks %}
+                            {% if user.username == task.locator_id.username %}
+                                <li class="listItem {% if task.is_done %}listItemChecked{% else %}listItemUnchecked{% endif %}">
+                                    <p>{{task.task_id.name}}</p>
+                                    <input hx-post="" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                           hx-vals='{"task_id": "{{ task.id }}", "formtype": "done", "checked": "{% if task.is_done %}off{% else %}on{% endif %}"}' hx-target="body"
+                                           hx-on="click" type="checkbox" name="checked" {% if task.is_done %}checked{% endif %}>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-<body>
+        {% endif %}
+        {% if tasksByWeekBefore|length != 0 %}
+        <div>
+            <h2>Unfinished previous weeks:</h2>
+            {% for week, tasks in tasksByWeekBefore.items %}
 
-  <div class="tasksWrapper">
-    <div id="tasks" class="tasks">
-      {% for user in taskUsers %}
-        <div class="tasksContentWrapper">
-          <div class="tasksContent">
-            <form name="{{user.id}}" method="post">
-              {% csrf_token %}
-              <input type="hidden" id="formtype" name="formtype" value="user">
-              <select class="userSelect" name="{{user.id}}">
-                {% for u in users %}
-                  {% if u.id == user.id %}
-                    <option class="userOption" value="{{u.id}}" selected>{{u.username}}</option>
-                  {% else %}
-                    <option class="userOption" value="{{u.id}}">{{u.username}}</option>
-                  {% endif %}
-                {% endfor %}
-              </select>
-            </form>
-            <ul>
-              {% for task in tasks %}
-              {% if user.username == task.locator_id.username %}
-              {% if task.is_done %}
-              <li class="listItem listItemChecked">
-                  <label>{{task.task_id.name}}</label>
-                  <form id="{{task.task_id.id}}" name="{{task.task_id.id}}" method="post">
-                    <input type="hidden" id="formtype" name="formtype" value="done">
-                    {% csrf_token %}
-                    <input type="hidden" name={{task.task_id.id}} value = "0">
-                    <input type="checkbox" name="{{task.task_id.id}}" checked>
-                  </form>
-              </li>
-              {% else %}
-              <li class="listItem listItemUnchecked">
-                <label>{{task.task_id.name}}</label>
-                <form id="{{task.task_id.id}}" name="{{task.task_id.id}}" method="post">
-                  <input type="hidden" id="formtype" name="formtype" value="done">
-                  {% csrf_token %}
-                  <input type="hidden" name={{task.task_id.id}} value = "0">
-                  <input type="checkbox" name="{{task.task_id.id}}">
-                </form>
-              </li>
-              {% endif %}
-              {% endif %}
-              {% endfor %}
-            </ul>
-          </div>
+                <div class="card verticalList">
+                    <div class="verticalListHeader">
+                        <img class="icon-light" src="{% static 'icons/tasks-dark.png' %}" />
+                        <img class="icon-dark" src="{% static 'icons/tasks-light.png' %}" />
+                        <h2>{{ week.start_date|date:"d M Y" }} - {{ week.end_date|date:"d M Y" }}</h2>
+                    </div>
+                    <ul>
+                        {% for task in tasks %}
+                            {% if user.username == task.locator_id.username %}
+                                <li class="listItem {% if task.is_done %}listItemChecked{% else %}listItemUnchecked{% endif %}">
+                                    <p>{{task.task_id.name}}</p>
+                                    <input hx-post="" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                           hx-vals='{"task_id": "{{ task.id }}", "formtype": "done", "checked": "{% if task.is_done %}off{% else %}on{% endif %}"}' hx-target="body"
+                                           hx-on="click" type="checkbox" name="checked" {% if task.is_done %}checked{% endif %}>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
         </div>
-      {% endfor %}
+        {% endif %}
     </div>
-  </div>
 
-  <script>
-
-    document.addEventListener('DOMContentLoaded', function() {
-
-      var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-      var selects = document.querySelectorAll('select');
-
-      console.log(checkboxes);
-      console.log(selects);
-
-      for (checkbox of checkboxes) {
-        checkbox.addEventListener('change', function() {
-          this.closest('form').submit();
-      });
-      }
-
-      for (select of selects) {
-        select.addEventListener('change', function() {
-          this.closest('form').submit();
-          console.log(this.value);
-        });
-      }
-    });
-
-  </script>
-
-
-</body>
 {% endblock content %}
 
