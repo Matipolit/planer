@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-_sh4gb9fjl&)__j)l_8qi953mayo28umz4y6)wbmaq60x&0@nj"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-env_debug = os.environ.get('PLANER_DEBUG')
+env_debug = os.environ.get("PLANER_DEBUG")
 if env_debug is None:
     DEBUG = False
 elif env_debug == "True":
@@ -32,8 +32,14 @@ elif env_debug == "True":
 else:
     DEBUG = False
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "192.168.0.32", "sienkiewiczapi.duckdns.org",
-                 "sienkiewicza114.wroclaw.pl"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "192.168.0.32",
+    "sienkiewiczapi.duckdns.org",
+    "sienkiewicza114.wroclaw.pl",
+]
 
 # Application definition
 
@@ -46,7 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "planer_app",
     "users_app",
-    "django_celery_results"
+    "django_celery_results",
 ]
 
 MIDDLEWARE = [
@@ -84,13 +90,13 @@ WSGI_APPLICATION = "planer.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': os.environ.get('DBENGINE', ''),
-        'NAME': os.environ.get('DBNAME', ''),
-        'USER': os.environ.get('DBUSER', ''),
-        'PASSWORD': os.environ.get('DBPASSWORD', ''),
-        'HOST': os.environ.get('DBHOST', ''),
-        'PORT': os.environ.get('DBPORT', ''),
+    "default": {
+        "ENGINE": os.environ.get("DBENGINE", ""),
+        "NAME": os.environ.get("DBNAME", ""),
+        "USER": os.environ.get("DBUSER", ""),
+        "PASSWORD": os.environ.get("DBPASSWORD", ""),
+        "HOST": os.environ.get("DBHOST", ""),
+        "PORT": os.environ.get("DBPORT", ""),
     }
 }
 
@@ -148,8 +154,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/planer/"
+STATIC_URL = "static/"
 STATIC_ROOT = "/var/www/html/static/planer"
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "planer_app/static"),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -157,15 +167,15 @@ STATIC_ROOT = "/var/www/html/static/planer"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Celery
-CELERY_BROKER_URL = 'redis://localhost:6379//'
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_ACCEPT_CONTENT = {'application/json'}
-CELERY_TIMEZONE = 'Europe/Warsaw'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_SERIALIZER = 'json'
+CELERY_BROKER_URL = "redis://localhost:6379//"
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_ACCEPT_CONTENT = {"application/json"}
+CELERY_TIMEZONE = "Europe/Warsaw"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
 
-email =os.environ.get('EMAIL', 'matipolit@gmail.com')
-password = os.environ.get('EMAIL_PASS', '')
+email = os.environ.get("EMAIL", "matipolit@gmail.com")
+password = os.environ.get("EMAIL_PASS", "")
 print("Host email: " + email)
 print("Host password: " + password)
 # Email
