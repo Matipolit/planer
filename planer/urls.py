@@ -17,7 +17,7 @@ URL_PREFIX = getattr(settings, "URL_PREFIX", "planer")
 
 def logout_view(request):
     logout(request)
-    return redirect("/planer/login")
+    return redirect(f"/{URL_PREFIX}/login")
 
 
 urlpatterns = [
