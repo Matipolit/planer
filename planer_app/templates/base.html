@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         {% load static %}
         <link rel="stylesheet" href="{% static 'style.css' %}">
-        <title>Planer</title>
+        <title>Planer - {{ URL_PREFIX }}</title>
     </head>
     <body>
 
@@ -15,7 +15,7 @@
             <h2>{% block title %}{% endblock title %}</h2>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <p>{{user.username}}</p>
-                <a class="button" href="/planer/logout" >Log out</a>
+                <a class="button" href="/{{ URL_PREFIX }}/logout" >Log out</a>
             </div>
     </div>
     {% endif %}
@@ -24,14 +24,14 @@
         {% if user.is_authenticated %}
         {% with request.resolver_match.view_name as view_name %}
             <div id="sideBar" style="display: flex; position: initial;">
-                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/planer/">☑️  Tasks</a>
-                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/planer/expenses/">💰 Expenses</a>
+                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/">☑️  Tasks</a>
+                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/expenses/">💰 Expenses</a>
                 {% if user.is_superuser %}
                     <br>
                     <b>Admin zone:</b>
-                    <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/planer/tasks_manage/">✏️ Manage tasks</a>
-                    <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/planer/users_manage/">🧑‍🤝‍🧑 Manage users</a>
-                    <a class="{% if view_name == "reports" %}selected {% endif %}nav" href="/planer/reports/">📃 Reports</a>
+                    <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/tasks_manage/">✏️ Manage tasks</a>
+                    <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/users_manage/">🧑‍🤝‍🧑 Manage users</a>
+                    <a class="{% if view_name == "reports" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/reports/">📃 Reports</a>
                 {% endif %}
             </div>
         {% endwith %}
@@ -124,4 +124,3 @@
         });
     }
 </script>
-
