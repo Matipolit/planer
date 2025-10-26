@@ -113,10 +113,9 @@
             <div class="gallery-grid">
                 {% for photo in photos %}
                     <div class="gallery-item" id="photo_{{ photo.id }}" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:0|divisibleby:10|yesno:'0,100' }}">
-                        <img src="{{ photo.image.url }}" 
+                        <img data-src="{{ photo.image.url }}" 
                              alt="{{ photo.title|default:'Photo' }}" 
-                             class="gallery-photo" 
-                             loading="lazy">
+                             class="gallery-photo lazy-image">
                         <div class="gallery-item-info">
                             <span class="category-badge">{{ photo.get_category_display }}</span>
                             {% if photo.title %}
@@ -126,10 +125,9 @@
                                 <p class="photo-description">{{ photo.description|truncatewords:15 }}</p>
                             {% endif %}
                             <p class="photo-meta">
-                                <img src="{% if photo.uploaded_by.profile.avatar %}{{ photo.uploaded_by.profile.avatar.url }}{% else %}{% static 'icons/user-dark.png' %}{% endif %}" 
+                                <img data-src="{% if photo.uploaded_by.profile.avatar %}{{ photo.uploaded_by.profile.avatar.url }}{% else %}{% static 'icons/user-dark.png' %}{% endif %}" 
                                      alt="{{ photo.uploaded_by.username }}" 
-                                     class="mini-avatar"
-                                     loading="lazy">
+                                     class="mini-avatar lazy-image">
                                 {{ photo.uploaded_by.first_name }} {{ photo.uploaded_by.last_name }}
                             </p>
                             <p class="photo-date">{{ photo.uploaded_at|date:"d M Y, H:i" }}</p>
@@ -149,6 +147,33 @@
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 
 <script>
+    // Simple Lazy Loading with Intersection Observer
+    document.addEventListener('DOMContentLoaded', function() {
+        const lazyImages = document.querySelectorAll('.lazy-image');
+        
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy-image');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+
+            lazyImages.forEach(function(img) {
+                imageObserver.observe(img);
+            });
+        } else {
+            // Fallback for older browsers
+            lazyImages.forEach(function(img) {
+                img.src = img.dataset.src;
+            });
+        }
+    });
+
     // Initialize AOS (Animate On Scroll)
     AOS.init({
         duration: 800,
