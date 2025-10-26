@@ -28,6 +28,7 @@ from .models import (
     GalleryPhoto,
     UserProfile,
 )
+from .utils import optimize_image, optimize_avatar
 import json
 from datetime import date, timedelta, datetime
 from planer_app.tasks import sendEmail
@@ -361,20 +362,60 @@ def week_details(request, date):
 def users_manage(request):
     if request.method == "POST":
         vars = request.POST
-        user = User.objects.create_user(
-            is_superuser="admin" in vars.keys(),
-            email=vars["email"],
-            username=vars["username"],
-            first_name=vars["first_name"],
-            last_name=vars["last_name"],
-            password=vars["password"],
-        )
+        formtype = vars.get("formtype", "add")
 
-        # Handle avatar upload
-        avatar = request.FILES.get("avatar")
-        if avatar:
-            user.profile.avatar = avatar
-            user.profile.save()
+        if formtype == "add":
+            # Create new user
+            user = User.objects.create_user(
+                is_superuser="admin" in vars.keys(),
+                email=vars["email"],
+                username=vars["username"],
+                first_name=vars["first_name"],
+                last_name=vars["last_name"],
+                password=vars["password"],
+            )
+
+            # Handle avatar upload
+            avatar = request.FILES.get("avatar")
+            if avatar:
+                # Optimize avatar: convert to WebP, resize to 200x200, compress
+                optimized_avatar = optimize_avatar(avatar, size=200, quality=85)
+                # Ensure profile exists (for users created before UserProfile model)
+                if not hasattr(user, "profile"):
+                    UserProfile.objects.create(user=user)
+                user.profile.avatar = optimized_avatar
+                user.profile.save()
+
+        elif formtype == "edit":
+            # Edit existing user
+            user_id = vars.get("user_id")
+            user = User.objects.get(id=user_id)
+
+            # Update user fields
+            user.email = vars["email"]
+            user.username = vars["username"]
+            user.first_name = vars["first_name"]
+            user.last_name = vars["last_name"]
+            user.is_superuser = "admin" in vars.keys()
+            user.is_staff = "admin" in vars.keys()
+
+            # Update password only if provided
+            password = vars.get("password", "").strip()
+            if password:
+                user.set_password(password)
+
+            user.save()
+
+            # Handle avatar upload
+            avatar = request.FILES.get("avatar")
+            if avatar:
+                # Optimize avatar: convert to WebP, resize to 200x200, compress
+                optimized_avatar = optimize_avatar(avatar, size=200, quality=85)
+                # Ensure profile exists (for users created before UserProfile model)
+                if not hasattr(user, "profile"):
+                    UserProfile.objects.create(user=user)
+                user.profile.avatar = optimized_avatar
+                user.profile.save()
 
     elif request.method == "DELETE":
         vars = json.loads(request.DELETE)
@@ -430,11 +471,16 @@ def gallery(request):
             image = request.FILES.get("image")
 
             if image:
+                # Optimize image: convert to WebP, resize, compress
+                optimized_image = optimize_image(
+                    image, max_width=1200, max_height=1200, quality=85
+                )
+
                 GalleryPhoto.objects.create(
                     title=title,
                     description=description,
                     category=category,
-                    image=image,
+                    image=optimized_image,
                     uploaded_by=request.user,
                 )
 
