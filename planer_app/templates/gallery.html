@@ -49,7 +49,7 @@
 <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
 
 <div class="cardCollection" style="width: 100%;">
-    
+
     <!-- Gallery Statistics Card -->
     <div class="card" style="width: 100%; margin-bottom: 16px;" data-aos="fade-down">
         <div style="display: flex; justify-content: space-around; padding: 12px; text-align: center;">
@@ -113,9 +113,10 @@
             <div class="gallery-grid">
                 {% for photo in photos %}
                     <div class="gallery-item" id="photo_{{ photo.id }}" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:0|divisibleby:10|yesno:'0,100' }}">
-                        <img data-src="{{ photo.image.url }}" 
-                             alt="{{ photo.title|default:'Photo' }}" 
-                             class="gallery-photo lazy-image">
+                        <img data-src="{{ photo.image.url }}"
+                             alt="{{ photo.title|default:'Photo' }}"
+                             class="gallery-photo lazy-image"
+                            loading="lazy">
                         <div class="gallery-item-info">
                             <span class="category-badge">{{ photo.get_category_display }}</span>
                             {% if photo.title %}
@@ -125,8 +126,8 @@
                                 <p class="photo-description">{{ photo.description|truncatewords:15 }}</p>
                             {% endif %}
                             <p class="photo-meta">
-                                <img data-src="{% if photo.uploaded_by.profile.avatar %}{{ photo.uploaded_by.profile.avatar.url }}{% else %}{% static 'icons/user-dark.png' %}{% endif %}" 
-                                     alt="{{ photo.uploaded_by.username }}" 
+                                <img data-src="{% if photo.uploaded_by.profile.avatar %}{{ photo.uploaded_by.profile.avatar.url }}{% else %}{% static 'icons/user-dark.png' %}{% endif %}"
+                                     alt="{{ photo.uploaded_by.username }}"
                                      class="mini-avatar lazy-image">
                                 {{ photo.uploaded_by.first_name }} {{ photo.uploaded_by.last_name }}
                             </p>
@@ -150,7 +151,7 @@
     // Simple Lazy Loading with Intersection Observer
     document.addEventListener('DOMContentLoaded', function() {
         const lazyImages = document.querySelectorAll('.lazy-image');
-        
+
         if ('IntersectionObserver' in window) {
             const imageObserver = new IntersectionObserver(function(entries, observer) {
                 entries.forEach(function(entry) {
@@ -214,7 +215,7 @@
 
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         console.log("Deleting photo with id: " + id);
-        
+
         const response = await fetch("", {
             method: "DELETE",
             headers: {
@@ -225,21 +226,21 @@
                 id: id
             })
         });
-        
+
         const data = await response.json();
         console.log(data);
-        
+
         if (data.deleted == "true") {
             console.log("Delete successful, removing element");
             const element = document.getElementById("photo_" + id);
-            
+
             // Add fade-out animation before removing
             element.style.transition = 'opacity 0.3s';
             element.style.opacity = '0';
-            
+
             setTimeout(() => {
                 element.remove();
-                
+
                 // Check if gallery is now empty
                 const galleryGrid = document.querySelector('.gallery-grid');
                 if (galleryGrid && galleryGrid.children.length === 0) {
