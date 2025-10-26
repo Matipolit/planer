@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import logout
 from django.urls import path, include, reverse_lazy
 from django.conf import settings
+from django.conf.urls.static import static
 from planer_app import views
 from django.contrib.auth.views import (
     LoginView,
@@ -30,3 +31,7 @@ urlpatterns = [
     ),
     path(f"{URL_PREFIX}/logout/", logout_view, name="logout"),
 ]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

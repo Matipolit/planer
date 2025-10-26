@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}📃 Reports{% endblock %}
+{% load static %}
+
+{% block title %}<img class="icon-dark" src="{% static 'icons/reports-light.png' %}" style="width:20px;height:20px;"/><img class="icon-light" src="{% static 'icons/reports-dark.png' %}" style="width:20px;height:20px;"/> Reports{% endblock %}
 
 {% block content %}
 <div class="cardCollection">

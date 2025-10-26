@@ -24,14 +24,15 @@
         {% if user.is_authenticated %}
         {% with request.resolver_match.view_name as view_name %}
             <div id="sideBar" style="display: flex; position: initial;">
-                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/">☑️  Tasks</a>
-                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/expenses/">💰 Expenses</a>
+                <a class="{% if view_name == "index" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/"><img class="nav-icon icon-dark" src="{% static 'icons/tasks-light.png' %}" /><img class="nav-icon icon-light" src="{% static 'icons/tasks-dark.png' %}" /> Tasks</a>
+                <a class="{% if view_name == "expenses" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/expenses/"><img class="nav-icon icon-dark" src="{% static 'icons/shopping-cart-light.png' %}" /><img class="nav-icon icon-light" src="{% static 'icons/shopping-cart-dark.png' %}" /> Expenses</a>
+                <a class="{% if view_name == "gallery" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/gallery/"><img class="nav-icon icon-dark" src="{% static 'icons/gallery-light.png' %}" /><img class="nav-icon icon-light" src="{% static 'icons/gallery-dark.png' %}" /> Gallery</a>
                 {% if user.is_superuser %}
                     <br>
                     <b>Admin zone:</b>
-                    <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/tasks_manage/">✏️ Manage tasks</a>
-                    <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/users_manage/">🧑‍🤝‍🧑 Manage users</a>
-                    <a class="{% if view_name == "reports" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/reports/">📃 Reports</a>
+                    <a class="{% if view_name == "tasks_manage" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/tasks_manage/"><img class="nav-icon icon-dark" src="{% static 'icons/calendar-light.png' %}" /><img class="nav-icon icon-light" src="{% static 'icons/calendar-dark.png' %}" /> Manage tasks</a>
+                    <a class="{% if view_name == "users_manage" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/users_manage/"><img class="nav-icon icon-dark" src="{% static 'icons/user-light.png' %}" /><img class="nav-icon icon-light" src="{% static 'icons/user-dark.png' %}" /> Manage users</a>
+                    <a class="{% if view_name == "reports" %}selected {% endif %}nav" href="/{{ URL_PREFIX }}/reports/"><img class="nav-icon icon-dark" src="{% static 'icons/reports-light.png' %}" /><img class="nav-icon icon-light" src="{% static 'icons/reports-dark.png' %}" /> Reports</a>
                 {% endif %}
             </div>
         {% endwith %}

@@ -4,9 +4,30 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest, JsonResponse, QueryDict
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Count, Sum, Q, Aggregate, Value, Case, When, CharField, F, OuterRef, Subquery
+from django.db.models import (
+    Count,
+    Sum,
+    Q,
+    Aggregate,
+    Value,
+    Case,
+    When,
+    CharField,
+    F,
+    OuterRef,
+    Subquery,
+)
 
-from .models import Task, User, TasksInWeek, Week, Purchase, Debt
+from .models import (
+    Task,
+    User,
+    TasksInWeek,
+    Week,
+    Purchase,
+    Debt,
+    GalleryPhoto,
+    UserProfile,
+)
 import json
 from datetime import date, timedelta, datetime
 from planer_app.tasks import sendEmail
@@ -23,7 +44,7 @@ def dateSpan(startDate, endDate, delta=timedelta(weeks=1)):
 
 
 # views
-@login_required(login_url='login')
+@login_required(login_url="login")
 def index(request: HttpRequest):
     thisWeek = None
     tasks = []
@@ -89,11 +110,13 @@ def index(request: HttpRequest):
 
     print(f"Before tasks: {tasks_by_week_before}")
 
-    context = {"tasks": tasks,
-               "tasksByWeekBefore": tasks_by_week_before,
-               "tasksByWeekAfter": tasks_by_week_after,
-               "users": users,
-               "week": thisWeek}
+    context = {
+        "tasks": tasks,
+        "tasksByWeekBefore": tasks_by_week_before,
+        "tasksByWeekAfter": tasks_by_week_after,
+        "users": users,
+        "week": thisWeek,
+    }
 
     return render(request, "index.html", context)
 
@@ -109,16 +132,18 @@ def get_my_debts_by_person(all_debts, user):
     return my_debts_by_person
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 def expenses(request: HttpRequest):
     my_debts_by_person = get_my_debts_by_person(Debt.objects.all(), request.user)
 
-    if (request.method == "POST"):
+    if request.method == "POST":
         vars = request.POST
         formType = vars["formtype"]
-        if (formType == "to_purchase"):
-            Purchase.objects.create(name=vars["name"], price=vars["price"], amount=vars["amount"])
-        elif (formType == "purchased"):
+        if formType == "to_purchase":
+            Purchase.objects.create(
+                name=vars["name"], price=vars["price"], amount=vars["amount"]
+            )
+        elif formType == "purchased":
             purchase = Purchase.objects.get(id=vars["purchase_id"])
             indebted = vars.getlist(key="indebted")
 
@@ -132,13 +157,20 @@ def expenses(request: HttpRequest):
                 locator = User.objects.get(id=locator_id)
 
                 print("indebted: " + locator_id)
-                Debt.objects.create(purchase_id=purchase, locator_id=locator, is_paid=False, owed_amount=owed_amount)
+                Debt.objects.create(
+                    purchase_id=purchase,
+                    locator_id=locator,
+                    is_paid=False,
+                    owed_amount=owed_amount,
+                )
                 email = locator.email
-                sendEmail.delay(email,
-                                f"Hi {locator.first_name},\nYou have a new debt of {owed_amount}\nfor the purchase of {purchase.name}.\nPlease pay it back to {request.user.first_name} {request.user.last_name}.\nThanks,\nPlaner App",
-                                f"Planer: New debt to {request.user.first_name} {request.user.last_name} ")
+                sendEmail.delay(
+                    email,
+                    f"Hi {locator.first_name},\nYou have a new debt of {owed_amount}\nfor the purchase of {purchase.name}.\nPlease pay it back to {request.user.first_name} {request.user.last_name}.\nThanks,\nPlaner App",
+                    f"Planer: New debt to {request.user.first_name} {request.user.last_name} ",
+                )
 
-        elif (formType == "pay_all_debts"):
+        elif formType == "pay_all_debts":
             paid_user = User.objects.get(id=vars["locator_id"])
             debts_to_pay = my_debts_by_person[paid_user]["debts"]
             for debt in debts_to_pay:
@@ -146,15 +178,24 @@ def expenses(request: HttpRequest):
                 debt.save()
 
             email = paid_user.email
-            sendEmail.delay(email,
-                            f"Hi {paid_user.first_name},\n{request.user.first_name} {request.user.last_name} has paid you back for all their debts - {my_debts_by_person[paid_user]['sum']}.\nThanks,\nPlaner App",
-                            f"Planer: All debts paid from {request.user.first_name} {request.user.last_name}")
-            my_debts_by_person = get_my_debts_by_person(Debt.objects.all(), request.user)
+            sendEmail.delay(
+                email,
+                f"Hi {paid_user.first_name},\n{request.user.first_name} {request.user.last_name} has paid you back for all their debts - {my_debts_by_person[paid_user]['sum']}.\nThanks,\nPlaner App",
+                f"Planer: All debts paid from {request.user.first_name} {request.user.last_name}",
+            )
+            my_debts_by_person = get_my_debts_by_person(
+                Debt.objects.all(), request.user
+            )
 
     to_purchase = Purchase.objects.filter(locator_id=None)
 
     users = User.objects.exclude(id=request.user.id)
-    context = {'to_purchase': to_purchase, 'debts': my_debts_by_person, 'user': request.user, 'users': users}
+    context = {
+        "to_purchase": to_purchase,
+        "debts": my_debts_by_person,
+        "user": request.user,
+        "users": users,
+    }
 
     return render(request, "expenses.html", context)
 
@@ -162,12 +203,14 @@ def expenses(request: HttpRequest):
 @staff_member_required(login_url="login")
 def tasks_manage(request):
     errors = []
-    if (request.method == "POST"):
+    if request.method == "POST":
         requestVars = request.POST
         formType = requestVars["formtype"]
 
         if formType == "task":
-            Task.objects.create(name=requestVars["name"], frequency=requestVars["frequency"])
+            Task.objects.create(
+                name=requestVars["name"], frequency=requestVars["frequency"]
+            )
 
         elif formType == "generate":
             tasks = Task.objects.all()
@@ -183,7 +226,11 @@ def tasks_manage(request):
                 else:
                     locators = User.objects.all().exclude(is_superuser=True)
                 locatorsNum = len(locators)
-                previousWeeks = Week.objects.all().filter(start_date__lte=begDate).order_by("-start_date")
+                previousWeeks = (
+                    Week.objects.all()
+                    .filter(start_date__lte=begDate)
+                    .order_by("-start_date")
+                )
                 tasksWithTimesToGenerate = dict()
                 for task in tasks:
                     tasksWithTimesToGenerate[task] = 1
@@ -195,24 +242,36 @@ def tasks_manage(request):
                         if idx == 0 and len(tasksInWeek) > 0:
                             locatorIdx = list(locators).index(tasksInWeek[0].locator_id)
                         for taskInWeek in tasksInWeek:
-                            if taskInWeek.task_id.frequency != tasksWithTimesToGenerate[taskInWeek.task_id]:
+                            if (
+                                taskInWeek.task_id.frequency
+                                != tasksWithTimesToGenerate[taskInWeek.task_id]
+                            ):
                                 if taskInWeek.task_id.frequency - idx > 1:
-                                    tasksWithTimesToGenerate[taskInWeek.task_id] = taskInWeek.task_id.frequency - idx
+                                    tasksWithTimesToGenerate[taskInWeek.task_id] = (
+                                        taskInWeek.task_id.frequency - idx
+                                    )
                     print(f"Previous weeks found: {previousWeeks}")
 
-                for (weekBegDate, idx) in dateSpan(begDate, endDate):
+                for weekBegDate, idx in dateSpan(begDate, endDate):
                     locatorIdx += 1
                     weekEndDate: datetime.date = weekBegDate + timedelta(days=6)
                     print(f"Generating week {weekBegDate} - {weekEndDate}")
-                    week = Week.objects.create(start_date=weekBegDate, end_date=weekEndDate)
+                    week = Week.objects.create(
+                        start_date=weekBegDate, end_date=weekEndDate
+                    )
                     print("week generated")
                     for task in tasksWithTimesToGenerate.keys():
-                        print(f"Checking to add task {task} with freq {task.frequency} and idx of week {idx}")
+                        print(
+                            f"Checking to add task {task} with freq {task.frequency} and idx of week {idx}"
+                        )
                         if tasksWithTimesToGenerate[task] == 1:
                             print(f"Task elegible to add")
-                            taskInWeek = TasksInWeek.objects.create(locator_id=locators[locatorIdx % locatorsNum],
-                                                                    task_id=task,
-                                                                    week_id=week, is_done=False)
+                            taskInWeek = TasksInWeek.objects.create(
+                                locator_id=locators[locatorIdx % locatorsNum],
+                                task_id=task,
+                                week_id=week,
+                                is_done=False,
+                            )
                             print(taskInWeek)
                             tasksWithTimesToGenerate[task] = task.frequency
                         else:
@@ -240,7 +299,12 @@ def tasks_manage(request):
     for week in weeks:
         tasksInWeek = TasksInWeek.objects.all().filter(week_id=week.id)
         week.count = len(tasksInWeek)
-    context = {"tasks": tasks, "today": monday_date.strftime("%Y-%m-%d"), "weeks": weeks, "errors": errors}
+    context = {
+        "tasks": tasks,
+        "today": monday_date.strftime("%Y-%m-%d"),
+        "weeks": weeks,
+        "errors": errors,
+    }
     return render(request, "tasks_manage.html", context)
 
 
@@ -265,7 +329,9 @@ def week_details(request, date):
             week = Week.objects.get(start_date=date)
             task = Task.objects.get(id=vars["task"])
             locator = User.objects.get(id=vars["locator"])
-            TasksInWeek.objects.create(week_id=week, task_id=task, locator_id=locator, is_done=False)
+            TasksInWeek.objects.create(
+                week_id=week, task_id=task, locator_id=locator, is_done=False
+            )
         elif type == "edit":
             id = vars["taskId"]
             instance = TasksInWeek.objects.get(id=id)
@@ -282,22 +348,35 @@ def week_details(request, date):
     tasks = TasksInWeek.objects.filter(week_id=week.id).order_by("id")
     taskIdsInWeek = tasks.values_list("task_id")
     tasksNotInWeek = Task.objects.exclude(id__in=taskIdsInWeek)
-    context = {"tasks": tasks, "week": week, "tasksNotInWeek": tasksNotInWeek, 'locators': User.objects.all()}
+    context = {
+        "tasks": tasks,
+        "week": week,
+        "tasksNotInWeek": tasksNotInWeek,
+        "locators": User.objects.all(),
+    }
     return render(request, "week.html", context)
 
 
 @staff_member_required(login_url="login")
 def users_manage(request):
-    if (request.method == "POST"):
+    if request.method == "POST":
         vars = request.POST
-        User.objects.create_user(is_superuser="admin" in vars.keys(),
-                                 email=vars["email"],
-                                 username=vars["username"],
-                                 first_name=vars["first_name"],
-                                 last_name=vars["last_name"],
-                                 password=vars["password"])
+        user = User.objects.create_user(
+            is_superuser="admin" in vars.keys(),
+            email=vars["email"],
+            username=vars["username"],
+            first_name=vars["first_name"],
+            last_name=vars["last_name"],
+            password=vars["password"],
+        )
 
-    elif (request.method == "DELETE"):
+        # Handle avatar upload
+        avatar = request.FILES.get("avatar")
+        if avatar:
+            user.profile.avatar = avatar
+            user.profile.save()
+
+    elif request.method == "DELETE":
         vars = json.loads(request.DELETE)
         id = vars["id"]
         instance = User.objects.get(id=id)
@@ -315,9 +394,9 @@ def reports(request):
     weeksWithUsers = []
 
     weeks = Week.objects.annotate(
-        total_tasks=Count('tasksinweek'),
-        completed_tasks=Count('tasksinweek', filter=Q(tasksinweek__is_done=True)),
-    ).order_by('start_date')
+        total_tasks=Count("tasksinweek"),
+        completed_tasks=Count("tasksinweek", filter=Q(tasksinweek__is_done=True)),
+    ).order_by("start_date")
 
     for week in weeks:
         users = User.objects.filter(tasksinweek__week_id=week.id).distinct()
@@ -325,12 +404,80 @@ def reports(request):
 
     unpaidPurchasesWithUsers = []
     unpaidPurchases = Purchase.objects.filter(debt__is_paid=False).annotate(
-        owedPerPerson=F('debt__purchase_id__price') / Count('debt__purchase_id')
+        owedPerPerson=F("debt__purchase_id__price") / Count("debt__purchase_id")
     )
 
     for purchase in unpaidPurchases:
-        users = User.objects.filter(debt__purchase_id=purchase.id, debt__is_paid=False).distinct()
+        users = User.objects.filter(
+            debt__purchase_id=purchase.id, debt__is_paid=False
+        ).distinct()
         unpaidPurchasesWithUsers.append({"purchase": purchase, "users": users})
 
     context = {"weeks": weeksWithUsers, "purchases": unpaidPurchasesWithUsers}
     return render(request, "reports.html", context)
+
+
+@login_required(login_url="login")
+def gallery(request):
+    if request.method == "POST":
+        vars = request.POST
+        formType = vars.get("formtype")
+
+        if formType == "upload_photo":
+            title = vars.get("title", "")
+            description = vars.get("description", "")
+            category = vars.get("category", "other")
+            image = request.FILES.get("image")
+
+            if image:
+                GalleryPhoto.objects.create(
+                    title=title,
+                    description=description,
+                    category=category,
+                    image=image,
+                    uploaded_by=request.user,
+                )
+
+    elif request.method == "DELETE":
+        vars = json.loads(request.DELETE)
+        photo_id = vars.get("id")
+        photo = GalleryPhoto.objects.get(id=photo_id)
+
+        # Only allow deletion by uploader or admin
+        if photo.uploaded_by == request.user or request.user.is_superuser:
+            photo.delete()
+            return JsonResponse({"deleted": "true"})
+        return JsonResponse({"deleted": "false", "error": "Permission denied"})
+
+    # Filter photos based on query parameters
+    photos = GalleryPhoto.objects.all()
+
+    # Category filter
+    category_filter = request.GET.get("category")
+    if category_filter and category_filter != "all":
+        photos = photos.filter(category=category_filter)
+
+    # Date range filter
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+    if date_from:
+        photos = photos.filter(uploaded_at__gte=date_from)
+    if date_to:
+        # Add one day to include the end date
+        from datetime import datetime, timedelta
+
+        end_date = datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=1)
+        photos = photos.filter(uploaded_at__lt=end_date)
+
+    # Get statistics for the page
+    total_photos = GalleryPhoto.objects.count()
+    user_upload_count = GalleryPhoto.objects.filter(uploaded_by=request.user).count()
+
+    context = {
+        "photos": photos,
+        "categories": GalleryPhoto.CATEGORY_CHOICES,
+        "selected_category": category_filter or "all",
+        "total_photos": total_photos,
+        "user_upload_count": user_upload_count,
+    }
+    return render(request, "gallery.html", context)

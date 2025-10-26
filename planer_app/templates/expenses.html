@@ -28,7 +28,7 @@
     <div id="payPurchase" class="popupWindow card" ></div>
 {% endblock popupwindows %}
 
-{% block title %}💰 Expenses{% endblock title %}
+{% block title %}<img class="icon-dark" src="{% static 'icons/shopping-cart-light.png' %}" style="width:20px;height:20px;"/><img class="icon-light" src="{% static 'icons/shopping-cart-dark.png' %}" style="width:20px;height:20px;"/> Expenses{% endblock title %}
 
 {% block content %}
 
@@ -73,12 +73,21 @@
             <p>Empty</p>
         {% endif %}
         {% for user, debt_list in debts.items %}
-          <div class="item debts" id="debtlist_{{ user }}">
-            <p>Debt for: <b>{{ user.first_name}} {{ user.last_name }}</b></p>
-            <p>Sum owed: <b>{{ debt_list.sum|floatformat:2 }}</b></p>
-            <p>Number of purchases: <b>{{ debt_list.debts|length }}</b></p>
+          <div class="item debts" id="debtlist_{{ user }}" style="display: flex; gap: 15px; align-items: center;">
+            <div>
+              {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" loading="lazy">
+              {% else %}
+                <img src="{% static 'icons/user-dark.png' %}" alt="{{ user.username }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; padding: 8px; background: #f0f0f0;">
+              {% endif %}
+            </div>
+            <div style="flex: 1;">
+              <p>Debt for: <b>{{ user.first_name}} {{ user.last_name }}</b></p>
+              <p>Sum owed: <b>{{ debt_list.sum|floatformat:2 }}</b></p>
+              <p>Number of purchases: <b>{{ debt_list.debts|length }}</b></p>
               <button hx-post="" hx-trigger="click" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-vals='{"formtype": "pay_all_debts", "locator_id": "{{ user.id }}"}'
                       hx-confirm="Are you sure the debt of {{ debt_list.sum|floatformat:2 }} was paid?" hx-swap="delete" hx-target="#debtlist_{{ user }}">Paid</button>
+            </div>
           </div>
         {% endfor %}
     </div>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}☑️ Your tasks{% endblock title %}
+{% block title %}<img class="icon-dark" src="{% static 'icons/tasks-light.png' %}" style="width:20px;height:20px;"/><img class="icon-light" src="{% static 'icons/tasks-dark.png' %}" style="width:20px;height:20px;"/> Your tasks{% endblock title %}
 
 {% block content %}
     <div class="cardCollection">
@@ -16,8 +16,13 @@
                     <ul>
                         {% for task in tasks %}
                             {% if user.username == task.locator_id.username %}
-                                <li class="listItem {% if task.is_done %}listItemChecked{% else %}listItemUnchecked{% endif %}">
-                                    <p>{{task.task_id.name}}</p>
+                                <li class="listItem {% if task.is_done %}listItemChecked{% else %}listItemUnchecked{% endif %}" style="display: flex; align-items: center; gap: 10px;">
+                                    {% if task.locator_id.profile.avatar %}
+                                        <img src="{{ task.locator_id.profile.avatar.url }}" alt="{{ task.locator_id.username }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" loading="lazy">
+                                    {% else %}
+                                        <img src="{% static 'icons/user-dark.png' %}" alt="{{ task.locator_id.username }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; padding: 4px; background: #f0f0f0;">
+                                    {% endif %}
+                                    <p style="flex: 1;">{{task.task_id.name}}</p>
                                     <input hx-post="" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                                            hx-vals='{"task_id": "{{ task.id }}", "formtype": "done", "checked": "{% if task.is_done %}off{% else %}on{% endif %}"}' hx-target="body"
                                            hx-on="click" type="checkbox" name="checked" {% if task.is_done %}checked{% endif %}>
@@ -43,8 +48,13 @@
                     <ul>
                         {% for task in tasks %}
                             {% if user.username == task.locator_id.username %}
-                                <li class="listItem {% if task.is_done %}listItemChecked{% else %}listItemUnchecked{% endif %}">
-                                    <p>{{task.task_id.name}}</p>
+                                <li class="listItem {% if task.is_done %}listItemChecked{% else %}listItemUnchecked{% endif %}" style="display: flex; align-items: center; gap: 10px;">
+                                    {% if task.locator_id.profile.avatar %}
+                                        <img src="{{ task.locator_id.profile.avatar.url }}" alt="{{ task.locator_id.username }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" loading="lazy">
+                                    {% else %}
+                                        <img src="{% static 'icons/user-dark.png' %}" alt="{{ task.locator_id.username }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; padding: 4px; background: #f0f0f0;">
+                                    {% endif %}
+                                    <p style="flex: 1;">{{task.task_id.name}}</p>
                                     <input hx-post="" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                                            hx-vals='{"task_id": "{{ task.id }}", "formtype": "done", "checked": "{% if task.is_done %}off{% else %}on{% endif %}"}' hx-target="body"
                                            hx-on="click" type="checkbox" name="checked" {% if task.is_done %}checked{% endif %}>

@@ -7,7 +7,7 @@
             <h2>Add user</h2>
             <button onclick="closeWindow('addUserWindow')">X</button>
         </div>
-             <form  method="post">
+             <form  method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="checkbox" id="admin" name="admin" value="admin">
                 <label for="admin">Admin</label><br>
@@ -20,13 +20,16 @@
                 <label for="last_name">Last name:</label><br>
                 <input type="text" id="last_name" name="last_name"><br>
                 <label for="password">Password:</label><br>
-                <input type="text" id="password" name="password"><br><br>
+                <input type="text" id="password" name="password"><br>
+                <label for="avatar">Profile Picture (optional):</label><br>
+                <input type="file" id="avatar" name="avatar" accept="image/*"><br><br>
                 <input class="button" type="submit" value="Add user">
             </form>
         </div>
 {% endblock popupwindows %}
 
-{% block title %}🧑‍🤝‍🧑 Manage users{% endblock title %}
+{% load static %}
+{% block title %}<img class="icon-dark" src="{% static 'icons/user-light.png' %}" style="width:20px;height:20px;"/><img class="icon-light" src="{% static 'icons/user-dark.png' %}" style="width:20px;height:20px;"/> Manage users{% endblock title %}
 {% block content %}
 
 
@@ -59,15 +62,24 @@
         <button onclick="showWindow('addUserWindow')">+</button>
     </div>
       {% for user in users %}
-        <div class="item">
-          {% if user.is_staff %}
-            <p class="info"><b>Admin</b></p>
-          {% endif %}
-          <p>Email: <b>{{ user.email}}</b></p>
-          <p>First name: <b>{{ user.first_name}}</b></p>
-          <p>Last name: <b>{{ user.last_name}}</b></p>
-          <p>Username: <b>{{ user.username }}</b></p>
-        <button onClick="deleteUser({{ user.id }})">Delete</button>
+        <div class="item" style="display: flex; gap: 15px; align-items: center;">
+          <div>
+            {% if user.profile.avatar %}
+              <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+            {% else %}
+              <img src="{% static 'icons/user-dark.png' %}" alt="{{ user.username }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; padding: 10px; background: #f0f0f0;">
+            {% endif %}
+          </div>
+          <div style="flex: 1;">
+            {% if user.is_staff %}
+              <p class="info"><b>Admin</b></p>
+            {% endif %}
+            <p>Email: <b>{{ user.email}}</b></p>
+            <p>First name: <b>{{ user.first_name}}</b></p>
+            <p>Last name: <b>{{ user.last_name}}</b></p>
+            <p>Username: <b>{{ user.username }}</b></p>
+            <button onClick="deleteUser({{ user.id }})">Delete</button>
+          </div>
         </div>
       {% endfor %}
     </div>
