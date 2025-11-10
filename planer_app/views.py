@@ -28,6 +28,7 @@ from .models import (
     GalleryPhoto,
     UserProfile,
 )
+from .utils import resize_image
 import json
 from datetime import date, timedelta, datetime
 from planer_app.tasks import sendEmail
@@ -430,11 +431,14 @@ def gallery(request):
             image = request.FILES.get("image")
 
             if image:
+
+                resized_image = resize_image(image, max_width=1800, max_height=1800)
+
                 GalleryPhoto.objects.create(
                     title=title,
                     description=description,
                     category=category,
-                    image=image,
+                    image=resized_image,
                     uploaded_by=request.user,
                 )
 
