@@ -1,10 +1,16 @@
 <!DOCTYPE html>
+
+{% load static %}
+{% load compress %}
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        {% load static %}
-        <link rel="stylesheet" href="{% static 'style.css' %}">
+
+        {% compress css inline %}
+            <link rel="stylesheet" href="{% static 'style.css' %}">
+        {% endcompress %}
+
         <title>Planer - {{ URL_PREFIX }}</title>
     </head>
     <body>
@@ -55,7 +61,9 @@
     </body>
 </html>
 
+{% compress js %}
 <script src="{% static 'htmx.min.js' %}" defer></script>
+{% endcompress %}
 
 <script>
     window.addEventListener("load" , () => {

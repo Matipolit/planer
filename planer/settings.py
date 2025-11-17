@@ -2,8 +2,8 @@
 Django settings for planer project.
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "compressor",
     "planer_app",
     "users_app",
     "django_celery_results",
@@ -181,3 +182,21 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = email
 EMAIL_HOST_PASSWORD = password
 DEFAULT_FROM_EMAIL = f"<{email}>"
+
+# Django Compressor Configuration
+COMPRESS_ENABLED = not DEBUG  # Only minify in production
+COMPRESS_OFFLINE = True  # Pre-compress during deployment
+COMPRESS_CSS_FILTERS = [
+    "compressor.filters.css_default.CssAbsoluteFilter",
+    "compressor.filters.cssmin.rCSSMinFilter",  # Minify CSS
+]
+COMPRESS_JS_FILTERS = [
+    "compressor.filters.jsmin.JSMinFilter",  # Minify JS
+]
+
+# Add compressor to staticfiles finders
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+]
