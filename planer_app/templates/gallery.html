@@ -152,11 +152,11 @@
 <script src="{% static 'gallery/gallery.js' %}"></script>
 {% endcompress %}
 
-<!-- External JS libraries (cached separately, larger files) -->
-{% compress js %}
+<!-- External JS libraries -->
+
 <script src="{% static 'gallery/flatpickr.min.js' %}" id="flatpickr-script" defer></script>
 <script src="{% static 'gallery/aos.min.js' %}" id="aos-script" defer></script>
-{% endcompress %}
+
 
 <!-- Library initialization (inline, page-specific) -->
 {% compress js inline %}
